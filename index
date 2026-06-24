@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Parche Zipa · Plan de Acción CCyD 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,800;1,900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{
+  --ink:#0A0A0B; --ink2:#121214; --card:#17171A; --card2:#1E1E22;
+  --line:#2A2A2F; --yellow:#F4E500; --green:#2BE86B; --green-d:#13c456;
+  --white:#FFFFFF; --muted:#8C8C93; --muted2:#5E5E66; --red:#FF4D5E;
+  --shadow:6px 6px 0 #000; --shadow-sm:4px 4px 0 #000;
+  --r:18px; --r-sm:12px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Poppins',system-ui,sans-serif;background:var(--ink);color:var(--white);
+  min-height:100vh;overflow-x:hidden;
+  background-image:radial-gradient(circle at 12% 8%, rgba(244,229,0,.06), transparent 38%),
+                   radial-gradient(circle at 88% 92%, rgba(43,232,107,.06), transparent 42%),
+                   linear-gradient(rgba(255,255,255,.012) 1px, transparent 1px),
+                   linear-gradient(90deg, rgba(255,255,255,.012) 1px, transparent 1px);
+  background-size:auto,auto,46px 46px,46px 46px;
+}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-track{background:var(--ink2)}
+::-webkit-scrollbar-thumb{background:#33333a;border-radius:10px}
+::-webkit-scrollbar-thumb:hover{background:var(--yellow)}
+
+/* ===== LAYOUT ===== */
+.app{display:flex;min-height:100vh}
+.sidebar{
+  width:248px;flex-shrink:0;background:var(--ink2);border-right:2px solid #000;
+  position:sticky;top:0;height:100vh;display:flex;flex-direction:column;padding:20px 16px;z-index:40;
+  transition:width .25s ease;
+}
+.sidebar.collapsed{width:78px}
+.brand{display:flex;align-items:center;gap:12px;margin-bottom:26px;min-height:52px}
+.brand-logo{width:48px;height:48px;flex-shrink:0;filter:drop-shadow(2px 2px 0 #000)}
+.brand-txt{font-weight:900;line-height:1;letter-spacing:-.5px}
+.brand-txt .b1{font-size:18px;font-style:italic;color:var(--yellow);text-shadow:1.5px 1.5px 0 #000}
+.brand-txt .b2{font-size:12px;color:var(--green);font-weight:800;letter-spacing:1px}
+.sidebar.collapsed .brand-txt,.sidebar.collapsed .nav-label,.sidebar.collapsed .side-foot-txt{display:none}
+
+.nav{display:flex;flex-direction:column;gap:6px;flex:1}
+.nav-item{
+  display:flex;align-items:center;gap:13px;padding:11px 13px;border-radius:var(--r-sm);
+  cursor:pointer;color:var(--muted);font-weight:600;font-size:14px;border:2px solid transparent;
+  transition:.15s;position:relative;user-select:none;white-space:nowrap;
+}
+.nav-item svg{width:21px;height:21px;flex-shrink:0}
+.nav-item:hover{background:#202024;color:var(--white)}
+.nav-item.active{background:var(--yellow);color:#000;border-color:#000;box-shadow:var(--shadow-sm);font-weight:800;transform:translateX(2px)}
+.nav-item.active svg{stroke:#000}
+.nav-num{position:absolute;right:11px;font-size:11px;font-weight:800;opacity:.5}
+.sidebar.collapsed .nav-num{display:none}
+
+.side-foot{margin-top:auto;padding-top:14px;border-top:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}
+.side-foot-txt{font-size:10px;color:var(--muted2);line-height:1.3}
+/* hidden admin trigger = lightning dot */
+.admin-dot{width:16px;height:16px;border-radius:50%;cursor:pointer;opacity:.14;flex-shrink:0;transition:.2s;display:grid;place-items:center}
+.admin-dot:hover{opacity:.85}
+.admin-dot svg{width:13px;height:13px}
+
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
+
+/* ===== TOPBAR / FILTERS ===== */
+.topbar{
+  position:sticky;top:0;z-index:30;background:rgba(10,10,11,.86);backdrop-filter:blur(10px);
+  border-bottom:2px solid #000;padding:14px 26px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+}
+.burger{background:var(--card);border:2px solid #000;border-radius:10px;width:40px;height:40px;display:grid;place-items:center;cursor:pointer;color:var(--white);flex-shrink:0}
+.burger:hover{background:var(--yellow);color:#000}
+.page-title{font-weight:900;font-size:19px;font-style:italic;letter-spacing:-.5px;margin-right:auto;text-transform:uppercase}
+.page-title b{color:var(--yellow)}
+.filters{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.fbox{position:relative}
+.fbox label{position:absolute;top:-7px;left:11px;font-size:9px;font-weight:800;color:var(--green);background:var(--ink);padding:0 5px;text-transform:uppercase;letter-spacing:.5px;border-radius:4px}
+select{
+  appearance:none;background:var(--card);color:var(--white);border:2px solid #000;border-radius:10px;
+  padding:9px 32px 9px 13px;font-family:inherit;font-weight:600;font-size:12.5px;cursor:pointer;
+  max-width:200px;text-overflow:ellipsis;box-shadow:var(--shadow-sm);transition:.15s;
+}
+select:hover{border-color:var(--yellow)}
+select:focus{outline:none;border-color:var(--green)}
+.fbox::after{content:"▾";position:absolute;right:12px;top:9px;color:var(--yellow);pointer-events:none;font-size:13px}
+.btn-clear{background:var(--red);color:#fff;border:2px solid #000;border-radius:10px;padding:9px 14px;font-weight:800;font-size:12px;cursor:pointer;box-shadow:var(--shadow-sm);display:flex;align-items:center;gap:6px}
+.btn-clear:hover{transform:translate(-1px,-1px);box-shadow:5px 5px 0 #000}
+.btn-clear:active{transform:translate(2px,2px);box-shadow:2px 2px 0 #000}
+
+.content{padding:26px;max-width:1500px;width:100%;margin:0 auto}
+.page{display:none;animation:fade .4s ease}
+.page.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+
+/* ===== STICKER / SECTION HEADERS ===== */
+.tag{
+  display:inline-flex;align-items:center;gap:9px;background:var(--yellow);color:#000;font-weight:900;
+  font-style:italic;text-transform:uppercase;font-size:13px;letter-spacing:.5px;padding:7px 15px;
+  border:2.5px solid #000;border-radius:10px;box-shadow:var(--shadow-sm);transform:rotate(-1.4deg);margin-bottom:18px;
+}
+.tag.green{background:var(--green)}
+.tag svg{width:17px;height:17px}
+.section-gap{margin-top:34px}
+
+/* ===== KPI CARDS ===== */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:16px}
+.kpi{
+  background:var(--card);border:2.5px solid #000;border-radius:var(--r);padding:18px 18px 16px;
+  box-shadow:var(--shadow);position:relative;overflow:hidden;transition:.2s;opacity:0;transform:translateY(16px);
+}
+.kpi.in{opacity:1;transform:none}
+.kpi:hover{transform:translateY(-4px) rotate(-.6deg);box-shadow:8px 9px 0 #000}
+.kpi::before{content:"";position:absolute;top:0;left:0;width:100%;height:5px;background:var(--accent,var(--yellow))}
+.kpi-ico{width:38px;height:38px;border-radius:10px;background:var(--accent,var(--yellow));border:2px solid #000;display:grid;place-items:center;margin-bottom:12px}
+.kpi-ico svg{width:21px;height:21px;stroke:#000}
+.kpi-val{font-size:38px;font-weight:900;line-height:1;font-style:italic;letter-spacing:-1.5px}
+.kpi-lab{font-size:11.5px;color:var(--muted);font-weight:600;margin-top:7px;line-height:1.25;text-transform:uppercase;letter-spacing:.3px}
+.kpi-sub{font-size:10.5px;color:var(--green);font-weight:700;margin-top:4px}
+
+/* ===== PANELS / CHARTS ===== */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.panel{
+  background:var(--card);border:2.5px solid #000;border-radius:var(--r);padding:20px;
+  box-shadow:var(--shadow);position:relative;
+}
+.panel-h{display:flex;align-items:center;gap:9px;font-weight:800;font-size:15px;margin-bottom:16px;text-transform:uppercase;font-style:italic;letter-spacing:-.3px}
+.panel-h .dot{width:11px;height:11px;border-radius:50%;background:var(--yellow);border:2px solid #000}
+.panel-h.g .dot{background:var(--green)}
+.chart-wrap{position:relative;height:300px}
+.chart-wrap.sm{height:240px}
+
+/* ===== AI BLOCK ===== */
+.ai-panel{
+  background:linear-gradient(135deg,#16160c 0%,#0d1410 100%);
+  border:2.5px solid var(--yellow);border-radius:var(--r);padding:0;box-shadow:var(--shadow);overflow:hidden;
+}
+.ai-head{display:flex;align-items:center;gap:13px;padding:16px 20px;border-bottom:2px solid #000;background:rgba(0,0,0,.25)}
+.ai-orb{width:42px;height:42px;border-radius:12px;background:conic-gradient(from 0deg,var(--yellow),var(--green),var(--yellow));border:2.5px solid #000;display:grid;place-items:center;flex-shrink:0;animation:spin 6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ai-orb svg{width:22px;height:22px;animation:spin 6s linear infinite reverse}
+.ai-title{font-weight:900;font-style:italic;font-size:17px;text-transform:uppercase;letter-spacing:-.4px}
+.ai-title b{color:var(--yellow)}
+.ai-chip{font-size:9.5px;font-weight:800;padding:4px 9px;border-radius:20px;border:1.5px solid #000;text-transform:uppercase;letter-spacing:.5px;margin-left:auto;white-space:nowrap}
+.ai-chip.live{background:var(--green);color:#000}
+.ai-chip.off{background:#3a3a40;color:var(--muted)}
+.ai-chip.load{background:var(--yellow);color:#000}
+.ai-regen{background:var(--card);border:2px solid #000;border-radius:9px;width:36px;height:36px;display:grid;place-items:center;cursor:pointer;color:var(--white);flex-shrink:0}
+.ai-regen:hover{background:var(--yellow);color:#000}
+.ai-regen svg{width:18px;height:18px}
+.ai-body{padding:20px 22px;font-size:14px;line-height:1.72;color:#E7E7EA}
+.ai-body h4{color:var(--yellow);font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;margin:16px 0 7px;display:flex;align-items:center;gap:7px}
+.ai-body h4:first-child{margin-top:0}
+.ai-body h4::before{content:"";width:13px;height:13px;background:var(--green);border:2px solid #000;border-radius:3px;transform:rotate(45deg);flex-shrink:0}
+.ai-body p{margin-bottom:10px}
+.ai-body ul{margin:6px 0 12px 4px;list-style:none}
+.ai-body li{padding-left:22px;position:relative;margin-bottom:6px}
+.ai-body li::before{content:"⚡";position:absolute;left:0;color:var(--yellow)}
+.ai-body strong{color:var(--white)}
+.shimmer-line{height:13px;border-radius:6px;background:linear-gradient(90deg,#1f1f22 25%,#2c2c30 50%,#1f1f22 75%);background-size:200% 100%;animation:shim 1.4s infinite;margin-bottom:11px}
+@keyframes shim{to{background-position:-200% 0}}
+
+/* ===== CHIPS / BADGES ===== */
+.chip{display:inline-flex;align-items:center;gap:5px;padding:4px 11px;border-radius:20px;font-size:11px;font-weight:800;border:2px solid #000;text-transform:uppercase;letter-spacing:.3px}
+.chip.alto{background:var(--green);color:#000}
+.chip.medio{background:var(--yellow);color:#000}
+.chip.bajo{background:var(--red);color:#fff}
+.chip.sin{background:#3a3a40;color:var(--muted)}
+.chip.ghost{background:transparent;color:var(--muted);border-color:var(--line)}
+.sem{width:14px;height:14px;border-radius:50%;border:2px solid #000;display:inline-block;flex-shrink:0}
+.sem.alto{background:var(--green);box-shadow:0 0 10px var(--green)}
+.sem.medio{background:var(--yellow);box-shadow:0 0 10px var(--yellow)}
+.sem.bajo{background:var(--red);box-shadow:0 0 8px var(--red)}
+.sem.sin{background:#444}
+
+/* ===== OBJETIVO / DEP CARDS ===== */
+.acc{display:flex;flex-direction:column;gap:14px}
+.acc-card{background:var(--card);border:2.5px solid #000;border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden}
+.acc-top{display:flex;align-items:center;gap:14px;padding:18px 20px;cursor:pointer;transition:.15s}
+.acc-top:hover{background:var(--card2)}
+.acc-rank{width:42px;height:42px;flex-shrink:0;border-radius:12px;background:var(--yellow);border:2.5px solid #000;display:grid;place-items:center;font-weight:900;font-size:18px;font-style:italic;color:#000}
+.acc-rank.r2{background:var(--green)}.acc-rank.r3{background:var(--white)}
+.acc-info{flex:1;min-width:0}
+.acc-name{font-weight:800;font-size:15px;line-height:1.3;margin-bottom:6px}
+.acc-meta{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.mini{font-size:11px;color:var(--muted);font-weight:600;display:flex;align-items:center;gap:4px}
+.mini b{color:var(--white)}
+.acc-prog{width:120px;flex-shrink:0;text-align:right}
+.acc-pct{font-size:24px;font-weight:900;font-style:italic;line-height:1}
+.acc-bar{height:8px;background:#000;border-radius:6px;overflow:hidden;margin-top:6px;border:1.5px solid #000}
+.acc-bar i{display:block;height:100%;border-radius:6px;transition:width .8s ease}
+.acc-caret{transition:.2s;color:var(--muted)}
+.acc-card.open .acc-caret{transform:rotate(180deg);color:var(--yellow)}
+.acc-body{max-height:0;overflow:hidden;transition:max-height .35s ease;border-top:0 solid #000}
+.acc-card.open .acc-body{max-height:2600px;border-top:2px solid #000}
+.acc-body-in{padding:20px}
+
+table.tbl{width:100%;border-collapse:collapse;font-size:12.5px}
+.tbl th{text-align:left;color:var(--green);font-weight:800;font-size:10.5px;text-transform:uppercase;letter-spacing:.4px;padding:8px 10px;border-bottom:2px solid var(--line)}
+.tbl td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top;color:#D5D5D9}
+.tbl tr:last-child td{border-bottom:none}
+.tbl td b{color:var(--white)}
+
+/* ===== INDICATOR CARDS ===== */
+.ind-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:18px}
+.ind-card{background:var(--card);border:2.5px solid #000;border-radius:var(--r);box-shadow:var(--shadow);padding:18px;display:flex;flex-direction:column;gap:12px;transition:.2s;position:relative;overflow:hidden}
+.ind-card:hover{transform:translateY(-3px);box-shadow:8px 9px 0 #000}
+.ind-card::before{content:"";position:absolute;top:0;left:0;width:6px;height:100%;background:var(--ac,var(--yellow))}
+.ind-head{display:flex;align-items:flex-start;gap:10px;padding-left:6px}
+.ind-name{font-weight:800;font-size:13.5px;line-height:1.32;flex:1}
+.ind-obj{font-size:10.5px;color:var(--muted);font-weight:600;margin-top:3px;padding-left:6px;display:flex;align-items:center;gap:5px}
+.ind-desc{font-size:12px;color:#C6C6CB;line-height:1.55;background:var(--ink2);border:1.5px solid var(--line);border-radius:10px;padding:11px 13px;max-height:120px;overflow-y:auto}
+.ind-desc.empty{color:var(--muted2);font-style:italic}
+.ind-ai{font-size:12.3px;line-height:1.62;color:#DCDCE0;border-left:3px solid var(--green);padding:3px 0 3px 12px}
+.ind-metrics{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.metric{background:var(--ink2);border:1.5px solid var(--line);border-radius:10px;padding:9px 11px}
+.metric .ml{font-size:9px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.4px}
+.metric .mv{font-size:12.5px;font-weight:800;margin-top:3px;display:flex;align-items:center;gap:6px}
+.ind-foot{display:flex;align-items:center;justify-content:space-between;padding-top:4px}
+.btn-ai{background:var(--green);color:#000;border:2px solid #000;border-radius:9px;padding:7px 13px;font-weight:800;font-size:11px;cursor:pointer;display:flex;align-items:center;gap:6px;box-shadow:var(--shadow-sm)}
+.btn-ai:hover{background:var(--yellow);transform:translate(-1px,-1px)}
+.btn-ai:disabled{opacity:.5;cursor:wait}
+
+/* ===== GANTT ===== */
+.gantt{background:var(--card);border:2.5px solid #000;border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden}
+.gantt-head{display:grid;grid-template-columns:230px 1fr;border-bottom:2px solid #000}
+.gantt-head .gh-l{padding:12px 16px;font-size:11px;font-weight:800;color:var(--green);text-transform:uppercase;letter-spacing:.4px}
+.gantt-months{display:grid;grid-template-columns:repeat(12,1fr)}
+.gm{padding:12px 4px;text-align:center;font-size:10px;font-weight:700;color:var(--muted);border-left:1px solid var(--line)}
+.gantt-row{display:grid;grid-template-columns:230px 1fr;border-bottom:1px solid var(--line);transition:.15s}
+.gantt-row:hover{background:var(--card2)}
+.gr-l{padding:11px 16px;font-size:11.5px;font-weight:600;line-height:1.3;border-right:2px solid #000;display:flex;align-items:center;gap:8px}
+.gr-track{position:relative;display:grid;grid-template-columns:repeat(12,1fr);align-items:center;min-height:46px}
+.gr-track .gcol{border-left:1px solid var(--line);height:100%}
+.gbar{position:absolute;height:22px;border-radius:7px;border:2px solid #000;top:12px;display:flex;align-items:center;padding:0 8px;font-size:10px;font-weight:800;color:#000;white-space:nowrap;overflow:hidden;cursor:default;box-shadow:2px 2px 0 rgba(0,0,0,.5)}
+.gbar:hover{filter:brightness(1.08);z-index:5}
+
+/* ===== ADMIN MODAL ===== */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.78);backdrop-filter:blur(4px);z-index:90;display:none;align-items:center;justify-content:center;padding:24px}
+.modal-bg.show{display:flex}
+.modal{background:var(--ink2);border:3px solid var(--yellow);border-radius:22px;box-shadow:10px 10px 0 #000;max-width:460px;width:100%;padding:26px}
+.modal h3{font-weight:900;font-style:italic;font-size:20px;text-transform:uppercase;display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.modal h3 .lk{color:var(--green)}
+.modal p{color:var(--muted);font-size:12.5px;line-height:1.5;margin-bottom:18px}
+.drop{border:2.5px dashed var(--green);border-radius:16px;padding:28px 18px;text-align:center;cursor:pointer;transition:.2s;background:rgba(43,232,107,.04)}
+.drop:hover{background:rgba(43,232,107,.1);border-color:var(--yellow)}
+.drop svg{width:40px;height:40px;stroke:var(--green);margin-bottom:10px}
+.drop b{display:block;font-weight:800;font-size:14px;margin-bottom:4px}
+.drop span{font-size:11px;color:var(--muted)}
+.modal-actions{display:flex;gap:10px;margin-top:18px}
+.ma-btn{flex:1;padding:11px;border-radius:11px;border:2px solid #000;font-weight:800;font-size:12.5px;cursor:pointer;box-shadow:var(--shadow-sm)}
+.ma-btn.ghost{background:var(--card);color:var(--white)}
+.ma-btn.ghost:hover{background:#26262b}
+.ma-btn.danger{background:var(--red);color:#fff}
+.ma-close{position:absolute;top:18px;right:20px;cursor:pointer;color:var(--muted);font-size:24px;font-weight:700;line-height:1}
+.upload-status{margin-top:14px;font-size:12px;font-weight:700;padding:10px;border-radius:10px;display:none}
+.upload-status.ok{display:block;background:rgba(43,232,107,.12);color:var(--green);border:1.5px solid var(--green)}
+.upload-status.err{display:block;background:rgba(255,77,94,.12);color:var(--red);border:1.5px solid var(--red)}
+
+.empty-state{text-align:center;padding:60px 20px;color:var(--muted)}
+.empty-state svg{width:54px;height:54px;stroke:var(--muted2);margin-bottom:14px}
+
+/* tooltip */
+.tt{position:fixed;background:#000;border:2px solid var(--yellow);border-radius:10px;padding:10px 13px;font-size:11.5px;max-width:300px;z-index:100;pointer-events:none;box-shadow:4px 4px 0 rgba(0,0,0,.6);display:none;line-height:1.45}
+.tt b{color:var(--yellow)}
+
+/* responsive */
+@media(max-width:1080px){.grid2,.grid3{grid-template-columns:1fr}.sidebar{position:fixed;left:0;transform:translateX(0);box-shadow:8px 0 0 rgba(0,0,0,.4)}.sidebar.collapsed{transform:translateX(-100%);width:248px}.gantt-head,.gantt-row{grid-template-columns:150px 1fr}.gr-l{font-size:10px;padding:8px 10px}}
+@media(max-width:640px){.content{padding:16px}.topbar{padding:12px 14px}.page-title{font-size:15px;width:100%;order:-1}.kpi-val{font-size:30px}select{max-width:140px}}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(120px);background:var(--green);color:#000;font-weight:800;padding:13px 22px;border-radius:12px;border:2.5px solid #000;box-shadow:var(--shadow);z-index:120;transition:.3s;font-size:13px}
+.toast.show{transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <svg class="brand-logo" viewBox="0 0 100 100" fill="none"><rect x="6" y="6" width="88" height="88" rx="16" fill="#000"/><text x="50" y="42" font-family="Poppins" font-weight="900" font-style="italic" font-size="26" fill="#F4E500" text-anchor="middle">PAR</text><text x="50" y="72" font-family="Poppins" font-weight="900" font-style="italic" font-size="26" fill="#2BE86B" text-anchor="middle">CHE</text></svg>
+      <div class="brand-txt"><div class="b1">PARCHE</div><div class="b2">ZIPA · CCYD</div></div>
+    </div>
+    <nav class="nav" id="nav"></nav>
+    <div class="side-foot">
+      <div class="side-foot-txt">Plan de Acción<br>Juventud 2026</div>
+      <div class="admin-dot" id="adminDot" title="">
+        <svg viewBox="0 0 24 24" fill="var(--yellow)"><path d="M13 2L3 14h7v8l10-12h-7z"/></svg>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <header class="topbar">
+      <div class="burger" id="burger"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg></div>
+      <div class="page-title" id="pageTitle"><b>01</b> Resumen Ejecutivo</div>
+      <div class="filters">
+        <div class="fbox"><label>Objetivo / Línea</label><select id="fObj"></select></div>
+        <div class="fbox"><label>Dependencia</label><select id="fDep"></select></div>
+        <div class="fbox"><label>Indicador</label><select id="fInd"></select></div>
+        <button class="btn-clear" id="btnClear"><svg viewBox="0 0 24 24" width="14" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>Limpiar</button>
+      </div>
+    </header>
+    <div class="content" id="content"></div>
+  </div>
+</div>
+
+<!-- ADMIN MODAL -->
+<div class="modal-bg" id="modalBg">
+  <div class="modal" style="position:relative">
+    <span class="ma-close" id="maClose">×</span>
+    <h3><span class="lk">🔒</span> Panel de Actualización</h3>
+    <p>Zona privada del administrador. Carga el Excel actualizado del Plan de Acción (mismo formato de la matriz) para refrescar todos los indicadores, gráficos y análisis IA. Los datos quedan guardados en este navegador.</p>
+    <div class="drop" id="drop">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 16V4M5 11l7-7 7 7"/><path d="M4 18v2a2 2 0 002 2h12a2 2 0 002-2v-2" stroke-linecap="round"/></svg>
+      <b>Arrastra o haz clic para subir</b>
+      <span>Archivo .xlsx · hoja "Plan de Acción"</span>
+      <input type="file" id="fileInput" accept=".xlsx,.xls" style="display:none">
+    </div>
+    <div class="upload-status" id="upStatus"></div>
+    <div class="modal-actions">
+      <button class="ma-btn ghost" id="btnRestore">↺ Restaurar datos originales</button>
+    </div>
+  </div>
+</div>
+
+<div class="tt" id="tt"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============ DATA (matriz real embebida) ============ */
+const ORIGINAL_DATA = [{"id": 1, "objetivo": "Dar cumplimiento a la resolución administrativa 399 de 2021", "meta": "Realizar 4 sesiones anuales del CCyD", "accion": "Convocar mínimo 4 sesiones en el año (marzo, junio, septiembre y diciembre) y las extraordinarias necesarias.", "fechaInicio": "01/03/2026", "fechaFin": "31/12/2026", "indicador": "# de sesiones del CCyD realizadas", "periodicidad": "Trimestral", "responsable": "Secretaría de Familia y Desarrollo Social", "fuente": "Humano y tecnológico", "metaIndicador": 4, "ejecucion": 2, "descripcion": "Se realizo la primera sesión el pasado 26 de marzo, y la segunda 24 de Junio", "entregable": "Actas de cada sesión", "observaciones": null, "periodoReporte": "T1 2026"}, {"id": 2, "objetivo": "Dar cumplimiento al Acuerdo Municipal #21 de 2020", "meta": "Fortalecer el Observatorio de Juventudes.", "accion": "Convocar mínimo 4 sesiones en el año (marzo, junio, septiembre, diciembre) y las extraordinarias necesarias.", "fechaInicio": "01/01/2026", "fechaFin": "31/12/2026", "indicador": "# de sesiones del Observatorio realizadas", "periodicidad": "Trimestral", "responsable": "Secretaría de Familia y Desarrollo Social", "fuente": "Humano y tecnológico", "metaIndicador": 4, "ejecucion": 2, "descripcion": "Se realizo la promera sesion el 19 de marzo y la segunda el 18 de Junio", "entregable": "Actas de cada sesión", "observaciones": null, "periodoReporte": "T1 2026"}, {"id": 3, "objetivo": "Desarrollar la Semana de la Juventud", "meta": "Garantizar la participación activa de los jóvenes en la preparación de la Semana de la Juventud.", "accion": "Crear y aplicar una encuesta a jóvenes de colegios públicos y privados para identificar necesidades y gustos.", "fechaInicio": "01/04/2026", "fechaFin": "10/08/2026", "indicador": "# encuestas aplicadas / # jóvenes entre 14-17 años matriculados", "periodicidad": "Única vez", "responsable": "Sec. de Familia", "fuente": "Digital y tecnológico", "metaIndicador": 100, "ejecucion": null, "descripcion": null, "entregable": "Sistematización de encuesta aplicada", "observaciones": null, "periodoReporte": "Jun 2026"}, {"id": 4, "objetivo": "Desarrollar la Semana de la Juventud", "meta": "Garantizar la participación activa de los jóvenes en la preparación de la Semana de la Juventud.", "accion": "Generar mesas de trabajo para reconocer necesidades y gustos para la Semana de la Juventud.", "fechaInicio": "01/04/2026", "fechaFin": "31/12/2026", "indicador": "# de mesas de trabajo realizadas", "periodicidad": "Trimestral", "responsable": "Sec. de Familia – Consejo Municipal de Juventudes – Plataforma Municipal de Juventudes", "fuente": "Recurso humano; material fungible; equipos tecnológicos", "metaIndicador": 5, "ejecucion": 2, "descripcion": "Se llevo a cabo estas mesas de trabajo con Personeros y con los emprendedores.", "entregable": "Registro fotográfico; listas de asistencia; informe de impacto", "observaciones": null, "periodoReporte": "Mensual"}, {"id": 5, "objetivo": "Diagnóstico y Formulación de la Política Pública de Juventud", "meta": "Iniciar proceso para la formulación de la Política Pública de Juventudes.", "accion": "Generar informes de avance de la formulación de la Política Pública de Juventudes.", "fechaInicio": "01/06/2026", "fechaFin": "30/11/2026", "indicador": "# de informes de avance presentados", "periodicidad": "Semestral", "responsable": "Secretaría de Familia y Desarrollo Social", "fuente": "Informe de gestión.", "metaIndicador": 2, "ejecucion": 1, "descripcion": "Este informe se llevo a cabo el pasado 26 de mayo en una sesion solicitada a la ersoneria Municipal, y los jovenes del consejo de juventudes y la plataforma de juventudes.", "entregable": "1 documento de estudio técnico para presentación ante el Concejo Municipal", "observaciones": null, "periodoReporte": "S1 2026"}, {"id": 6, "objetivo": "Fortalecer proyectos productivos y emprendimientos juveniles", "meta": "Implementar acciones que permitan el fortalecimiento de ideas y negocios juveniles rurales y urbanos.", "accion": "Fortalecer las unidades productivas propias de jóvenes rurales.", "fechaInicio": "01/02/2026", "fechaFin": "31/12/2026", "indicador": "# de unidades productivas juveniles rurales fortalecidas", "periodicidad": "Semestral", "responsable": "Secretaría de Desarrollo Rural y Ambiente", "fuente": "Económico y humano", "metaIndicador": 15, "ejecucion": 34, "descripcion": "Fuente de informacion del observatorio de juventudes", "entregable": "Informe de unidades productivas de jóvenes fortalecidas", "observaciones": null, "periodoReporte": "S1 2026"}, {"id": 7, "objetivo": "Fortalecer proyectos productivos y emprendimientos juveniles", "meta": "Implementar acciones que permitan el fortalecimiento de ideas y negocios juveniles rurales y urbanos.", "accion": "Garantizar la participación de proyectos juveniles en el Fondo Progresa con acompañamiento y apoyo.", "fechaInicio": "01/02/2026", "fechaFin": "31/12/2026", "indicador": "# proyectos juveniles participantes en Fondo Progresa / # total de proyectos participantes", "periodicidad": "Anual", "responsable": "Secretaría de Desarrollo Económico", "fuente": "Económico, humano, tecnológico y digital", "metaIndicador": null, "ejecucion": null, "descripcion": null, "entregable": "Informe sobre jóvenes impactados en Fondo Progresa por año", "observaciones": null, "periodoReporte": "Dic 2026"}, {"id": 8, "objetivo": "Fortalecer proyectos productivos y emprendimientos juveniles", "meta": "Implementar acciones que permitan el fortalecimiento de ideas y negocios juveniles rurales y urbanos.", "accion": "Implementar estrategias que permitan la participación de jóvenes en acciones que fortalezcan sus proyectos de negocio y/o emprendimientos.", "fechaInicio": "01/02/2026", "fechaFin": "31/12/2026", "indicador": "# de estrategias implementadas", "periodicidad": "Semestral", "responsable": "Sec. de Familia – Sec. de Desarrollo Económico", "fuente": "Económico, humano, tecnológico y digital", "metaIndicador": 1, "ejecucion": 1, "descripcion": "A la fecha se llevó a cabo una jornada de articulación entre la estrategia Jóvenes Tiburones 2025 y el programa Fondo Progresa 2026, con el propósito de invitar y orientar a las y los participantes de Jóvenes Tiburones para que inscriban sus iniciativas y puedan postularse a la convocatoria de Fondo Progresa 2026.\n\nDe igual manera, se socializó que la estrategia Jóvenes Tiburones 2026 se encuentra proyectada para desarrollarse durante los meses de octubre o noviembre del presente año, con el objetivo de continuar fortaleciendo el emprendimiento y las iniciativas juveniles del municipio.", "entregable": "Informe sobre impacto de jóvenes en las estrategias implementadas", "observaciones": null, "periodoReporte": "S1 2026"}, {"id": 9, "objetivo": "Fortalecimiento de Casa de la Juventud", "meta": "Ampliar la oferta de servicios brindados en la Casa de la Juventud.", "accion": "Generar nueva oferta de servicios en la Casa de la Juventud.", "fechaInicio": "01/02/2026", "fechaFin": "01/12/2026", "indicador": "# de nuevas ofertas de servicios generadas", "periodicidad": "Bimestral", "responsable": "Sec. de Familia – IMCRDZ – Sec. Desarrollo Económico – Sec. Desarrollo Rural – Sec. Gobierno – Sec. Salud", "fuente": "Humano, tecnológico y digital", "metaIndicador": 5, "ejecucion": 8, "descripcion": "Actualmente, la Casa de la Juventud ofrece una programación permanente de actividades orientadas al desarrollo integral de las y los jóvenes, entre las que se encuentran:\n\nEn articulación con el Instituto de Cultura, se desarrollan clases de danza urbana, ritmos latinos y ballet para adolescentes.\nSe cuenta con procesos de formación en escena (teatro), marketing digital, Power BI y Excel Max, fortaleciendo habilidades artísticas y competencias para la empleabilidad.\nSe promueve el bienestar físico a través del grupo de running y actividades de acondicionamiento físico.\nEn el componente de salud mental, se realizan jornadas de Circuito Mental en instituciones educativas, una estrategia para promover el reconocimiento y manejo de las emociones.\nSe desarrollan espacios recreativos y de integración, como el intercambio de láminas (monas) del Mundial, que fomentan la convivencia y la participación juvenil.\n\nDe igual manera, se ha fortalecido la articulación interinstitucional con las diferentes secretarías de la Administración Municipal para la planificación y ejecución de una agenda de actividades dirigidas a la población LGBTIQ+, la cual dará inicio a partir del 3 de julio. Esta programación busca promover espacios de participación, bienestar, reconocimiento de la diversidad e inclusión para las juventudes y la comunidad en general.", "entregable": "Oferta institucional en Casa de la Juventud; cronograma de atención y actividades", "observaciones": null, "periodoReporte": "Bim. 1 2026"}, {"id": 10, "objetivo": "Fortalecimiento de Casa de la Juventud", "meta": "Ampliar la oferta de servicios brindados en la Casa de la Juventud.", "accion": "Realizar mínimo una actividad de impacto bimestral en la Casa de la Juventud.", "fechaInicio": "01/02/2026", "fechaFin": "31/12/2026", "indicador": "# de actividades de impacto realizadas", "periodicidad": "Bimestral", "responsable": "Sec. de Familia – Consejo Municipal de Juventudes – Plataforma Municipal de Juventudes", "fuente": "Humano, tecnológico y digital", "metaIndicador": 6, "ejecucion": 2, "descripcion": "Estrategia Circuito mental, Cine foro \"Ganes o Pierdas\"", "entregable": "Registro fotográfico; actas de reunión; piezas publicitarias", "observaciones": null, "periodoReporte": "Bim. 1 2026"}, {"id": 11, "objetivo": "Garantizar el restablecimiento de los derechos de NNA y Jóvenes", "meta": "Reducir el número de adolescentes que ingresan a proceso en el SRPA.", "accion": "Generar acciones de implementación en prevención del delito.", "fechaInicio": "01/04/2026", "fechaFin": "31/12/2026", "indicador": "# de acciones de prevención del delito implementadas", "periodicidad": "Trimestral", "responsable": "Secretaría de Seguridad y Convivencia", "fuente": "Recurso humano", "metaIndicador": 4, "ejecucion": null, "descripcion": null, "entregable": "Planillas de asistencia y registro fotográfico", "observaciones": "Meta de mantenimiento", "periodoReporte": "T2 2026"}, {"id": 12, "objetivo": "Garantizar el restablecimiento de los derechos de NNA y Jóvenes", "meta": "Atención integral a jóvenes en situación de calle.", "accion": "Implementar pedagogía de joven en calle y de calle.", "fechaInicio": "01/04/2026", "fechaFin": "31/12/2026", "indicador": "# de jóvenes en situación de calle atendidos", "periodicidad": "Mensual", "responsable": "Sec. de Familia – Sec. de Salud – Sec. de Gobierno", "fuente": "Recurso humano", "metaIndicador": 2, "ejecucion": 1, "descripcion": "El pasado 5 de junio se realizo la promera jornada de atencion para habitante de calle. Esta lidwerada por la secretaria de Gobierno, y adicionalmente articulado con la fundacion Renacer y Parche Zipa.", "entregable": "Registros de atención; informe mensual", "observaciones": null, "periodoReporte": "Mensual"}, {"id": 13, "objetivo": "Garantizar el restablecimiento de los derechos de NNA y Jóvenes", "meta": "Reducir el número de adolescentes que ingresan a proceso en el SRPA.", "accion": "Realizar actividades con los jóvenes involucrados en el SRPA.", "fechaInicio": 46026, "fechaFin": "31/12/2026", "indicador": "# de actividades realizadas con jóvenes SRPA", "periodicidad": "Bimestral", "responsable": "Sec. de Seguridad – Sec. de Familia", "fuente": "Recurso humano", "metaIndicador": null, "ejecucion": null, "descripcion": null, "entregable": "Registro de actividades; listas de asistencia", "observaciones": null, "periodoReporte": "Bim. 2 2026"}, {"id": 14, "objetivo": "Garantizar el restablecimiento de los derechos de NNA y Jóvenes", "meta": "Reducir el número de adolescentes que ingresan a proceso en el SRPA.", "accion": "Realizar talleres de orientación vocacional en instituciones educativas bachillerato del municipio.", "fechaInicio": "01/04/2026", "fechaFin": "31/12/2026", "indicador": "# de talleres de orientación vocacional realizados", "periodicidad": "Trimestral", "responsable": "Secretaría de Educación", "fuente": "Recurso humano; fungible", "metaIndicador": 10, "ejecucion": null, "descripcion": null, "entregable": "Correo electrónico con informe de UNIMINUTO", "observaciones": null, "periodoReporte": "T2 2026"}, {"id": 15, "objetivo": "Garantizar espacios de interlocución entre la adm. municipal y los jóvenes", "meta": "Realizar una Rendición Pública de Cuentas para NNA y Jóvenes.", "accion": "Convocar a una Rendición Pública de Cuentas anual para NNAJ con metodología específica para población joven.", "fechaInicio": "01/11/2026", "fechaFin": "31/12/2026", "indicador": "# de RPC de NNAJ realizadas", "periodicidad": "Anual", "responsable": "Sec. de Familia – Consejo Municipal de Juventudes – Plataforma Municipal de Juventudes", "fuente": "Recurso humano; material fungible; tecnológico y digital", "metaIndicador": 1, "ejecucion": null, "descripcion": null, "entregable": "Informe de Rendición de Cuentas de NNAJ", "observaciones": null, "periodoReporte": "Nov 2026"}, {"id": 16, "objetivo": "Garantizar espacios de interlocución entre la adm. municipal y los jóvenes", "meta": "Garantizar la realización de asambleas generales de juventud.", "accion": "Desarrollar al menos 2 asambleas juveniles en el año.", "fechaInicio": "01/04/2026", "fechaFin": "31/12/2026", "indicador": "# de asambleas juveniles realizadas", "periodicidad": "Semestral", "responsable": "Consejo Municipal de Juventudes – Sec. de Familia – Plataforma Municipal de Juventudes", "fuente": "Recurso humano; material fungible; tecnológico y digital", "metaIndicador": 2, "ejecucion": 1, "descripcion": "Se llevo a cabo la asamblea municipal de juventudes el pasado 13 de junio en casa de la juventud", "entregable": "Registro fotográfico; actas de reunión; piezas publicitarias; listas de asistencia", "observaciones": null, "periodoReporte": "S1 2026"}, {"id": 17, "objetivo": "Garantizar espacios de interlocución entre la adm. municipal y los jóvenes", "meta": "Garantizar la realización de asambleas generales de juventud.", "accion": "Generar informes de cada asamblea con población impactada y necesidades detectadas.", "fechaInicio": "01/04/2026", "fechaFin": "31/12/2026", "indicador": "# de informes de asamblea presentados", "periodicidad": "Semestral", "responsable": "Consejo Municipal de Juventudes", "fuente": "Recurso humano y tecnológico", "metaIndicador": 2, "ejecucion": 1, "descripcion": "Para CCYD del 25 de Junio", "entregable": "Informe final de asamblea general", "observaciones": null, "periodoReporte": "S1 2026"}, {"id": 18, "objetivo": "Garantizar la salud mental y bienestar de los jóvenes", "meta": "Promover el bienestar emocional y la salud mental de la población joven mediante estrategias integrales de prevención, orientación y atención inicial.", "accion": "Crear campañas de sensibilización sobre salud mental juvenil y prevención.", "fechaInicio": "01/02/2026", "fechaFin": "31/12/2026", "indicador": "# de campañas realizadas", "periodicidad": "Bimestral", "responsable": "Secretaría de Salud", "fuente": "Presupuesto salud mental; 2 profesionales", "metaIndicador": 5, "ejecucion": null, "descripcion": null, "entregable": "Piezas comunicativas; informes de impacto", "observaciones": null, "periodoReporte": "Bim. 1 2026"}, {"id": 19, "objetivo": "Garantizar la salud mental y bienestar de los jóvenes", "meta": "Promover el bienestar emocional y la salud mental de la población joven mediante estrategias integrales de prevención, orientación y atención inicial.", "accion": "Crear campañas de sensibilización sobre salud mental juvenil y prevención.", "fechaInicio": "01/02/2026", "fechaFin": "31/12/2026", "indicador": "# de campañas realizadas", "periodicidad": "Bimestral", "responsable": "Sec. de Seguridad", "fuente": "Presupuesto salud mental; 2 profesionales", "metaIndicador": 5, "ejecucion": null, "descripcion": null, "entregable": "Piezas comunicativas; informes de impacto", "observaciones": null, "periodoReporte": "Bim. 1 2026"}, {"id": 20, "objetivo": "Garantizar la salud mental y bienestar de los jóvenes", "meta": "Promover el bienestar emocional y la salud mental de la población joven mediante estrategias integrales de prevención, orientación y atención inicial.", "accion": "Crear campañas de sensibilización sobre salud mental juvenil y prevención.", "fechaInicio": "01/02/2026", "fechaFin": "31/12/2026", "indicador": "# de campañas realizadas", "periodicidad": "Bimestral", "responsable": "Sec. Familia", "fuente": "Presupuesto salud mental; 2 profesionales", "metaIndicador": 5, "ejecucion": 3, "descripcion": "Actualmente, la estrategia se desarrolla a través de cuatro líneas de acción:\n\n1. Estrategia Mente Sana: contempla intervenciones en instituciones educativas mediante la actividad **Circuito Mental**, una metodología que permite identificar el estado emocional de las y los jóvenes, promoviendo espacios de reflexión, fortalecimiento de la inteligencia emocional y reconocimiento de herramientas para el cuidado de la salud mental.\n\n2. Atención psicosocial: como parte de la estrategia Mente Sana, se brinda atención psicosocial gratuita en la Casa de la Juventud todos los miércoles, ofreciendo un espacio de orientación, escucha y acompañamiento para jóvenes que requieran apoyo en su bienestar emocional.\n\n3. Semillero de Salud Mental: implementado en las instituciones educativas Río Frío y Luis Orjuela, este espacio busca fortalecer las habilidades socioemocionales de los jóvenes mediante actividades enfocadas en el manejo de las emociones, la promoción de estilos de vida saludables y la prevención del consumo de sustancias psicoactivas (SPA).", "entregable": "Piezas comunicativas; informes de impacto", "observaciones": null, "periodoReporte": "Bim. 1 2026"}, {"id": 21, "objetivo": "Garantizar la salud mental y bienestar de los jóvenes", "meta": "Promover el bienestar emocional y la salud mental de la población joven mediante estrategias integrales de prevención, orientación y atención inicial.", "accion": "Establecer una línea de apoyo psicosocial y jurídico para jóvenes en situación de vulnerabilidad.", "fechaInicio": "01/02/2026", "fechaFin": "31/12/2026", "indicador": "# de jóvenes atendidos por programas/líneas de salud mental", "periodicidad": "Mensual", "responsable": "Sec. Salud", "fuente": "Línea esperanza", "metaIndicador": null, "ejecucion": null, "descripcion": null, "entregable": "Estadística de población atendida; informe de salud mental", "observaciones": null, "periodoReporte": "Mensual"}, {"id": 22, "objetivo": "Garantizar la salud mental y bienestar de los jóvenes", "meta": "Promover el bienestar emocional y la salud mental de la población joven mediante estrategias integrales de prevención, orientación y atención inicial.", "accion": "Establecer una línea de apoyo psicosocial y jurídico para jóvenes en situación de vulnerabilidad.", "fechaInicio": "01/02/2026", "fechaFin": "31/12/2026", "indicador": "# de jóvenes atendidos por programas/líneas de salud mental", "periodicidad": "Mensual", "responsable": "Sec. de Familia", "fuente": "Línea púrpura", "metaIndicador": null, "ejecucion": null, "descripcion": null, "entregable": null, "observaciones": null, "periodoReporte": null}, {"id": 23, "objetivo": "Garantizar la salud mental y bienestar de los jóvenes", "meta": "Promover el bienestar emocional y la salud mental de la población joven mediante estrategias integrales de prevención, orientación y atención inicial.", "accion": "Implementar acciones que permitan el fortalecimiento de la línea púrpura con mujeres jóvenes.", "fechaInicio": "01/04/2026", "fechaFin": "31/12/2026", "indicador": "# de mujeres jóvenes atendidas por línea púrpura", "periodicidad": "Mensual", "responsable": "Sec. de Familia", "fuente": "Recurso humano", "metaIndicador": null, "ejecucion": null, "descripcion": null, "entregable": "Estadística de atención línea púrpura", "observaciones": null, "periodoReporte": "Mensual"}, {"id": 24, "objetivo": "Garantizar la salud mental y bienestar de los jóvenes", "meta": "Promover el bienestar emocional y la salud mental de la población joven mediante estrategias integrales de prevención, orientación y atención inicial.", "accion": "Implementar programas de prevención de salud mental en instituciones educativas y comunidades.", "fechaInicio": "01/03/2026", "fechaFin": "31/12/2026", "indicador": "# de programas de prevención implementados", "periodicidad": "Trimestral", "responsable": "Secretaría de Salud", "fuente": "Presupuesto salud mental; 2 profesionales", "metaIndicador": 3, "ejecucion": null, "descripcion": null, "entregable": "Registro fotográfico; informe de impacto", "observaciones": null, "periodoReporte": "T1 2026"}, {"id": 25, "objetivo": "Garantizar la salud mental y bienestar de los jóvenes", "meta": "Promover la inclusión y reconocimiento de jóvenes LGTBIQ+.", "accion": "Realizar actividades para jóvenes LGTBIQ+ en la Casa de la Juventud.", "fechaInicio": "01/04/2026", "fechaFin": "31/12/2026", "indicador": "# de actividades para jóvenes LGTBIQ+ realizadas", "periodicidad": "Bimestral", "responsable": "Sec. de Familia – Casa de la Juventud – Consejo Municipal de Juventudes", "fuente": "Recurso humano; fungible", "metaIndicador": 10, "ejecucion": null, "descripcion": "11 de junio: se llevo a cabo la reunion con Lider juvenil del colectivo Sin Etiquetas, y el pograma de LGTBIQ+ donde se acordaron unas sesiones en las siguientes fechas:               \nJUNIO\tViernes 26 de junio de 2026\tBingo Bailable 🌈\tEspacio de integración, recreación y fortalecimiento comunitario para población LGBTIQ+.\nJULIO\tViernes 3 de julio de 2026\tEmprendimiento 💡\tTaller sobre ideas de negocio, marca personal y oportunidades de emprendimiento para jóvenes diversos.\nJULIO\tViernes 17 de julio de 2026\tJornada de Vacunación 💉\tActividad articulada con sector salud para promoción y acceso a esquemas de vacunación.\nAGOSTO\tViernes 14 de agosto de 2026\tBaile y Expresión Artística – Cultura 🎭\tJornada cultural enfocada en danza, expresión corporal y arte como herramientas de inclusión.\nAGOSTO\tViernes 21 de agosto de 2026\tSalud Integral 🩺\tTaller sobre uso correcto del condón, prevención de ITS y fortalecimiento de la salud mental.\nSEPTIEMBRE\tViernes 4 de septiembre de 2026\tTaller de Diversidades – ABC de la Sexualidad 🏳️‍🌈\tEspacio pedagógico sobre identidades, orientaciones sexuales, derechos y diversidad.\nOCTUBRE\tViernes 2 de octubre de 2026\tEmpleabilidad 💼\tOrientación ocupacional, construcción de hoja de vida y preparación para entrevistas laborales.\nOCTUBRE\tViernes 16 de octubre de 2026\tCentro Escucha 🎧\tEspacio de escucha activa, acompañamiento emocional y fortalecimiento psicosocial.\nNOVIEMBRE\tViernes 6 de noviembre de 2026\tEmprendimiento 🚀\tSegunda jornada de fortalecimiento empresarial y networking para comunidad LGBTIQ+.\nDICIEMBRE\tViernes 21 de noviembre de 2026\tTaller de Drag ✨\tEspacio artístico y cultural sobre maquillaje, performance y expresión drag como identidad y arte.", "entregable": "Registro fotográfico; listas de asistencia", "observaciones": null, "periodoReporte": "Bim. 2 2026"}];
+/* ============ APP LOGIC ============ */
+</script>
+<script>
+/* ============================================================
+   PARCHE ZIPA · Dashboard CCyD — App Logic
+   ============================================================ */
+(function(){
+'use strict';
+
+/* ---------- STATE ---------- */
+let DATA = [];
+const filters = { obj:'', dep:'', ind:'' };
+let currentPage = 1;
+const aiCache = {};            // key -> html
+let aiDebounce = null;
+
+/* ---------- KEYWORDS (del brief) ---------- */
+const KW = ['socializ','articul','ejecuc','capacit','seguimiento','particip',
+            'acompañ','implement','convocat','fortalec','formaci','sensibiliz',
+            'estrategia','jornada','taller','campañ','asamblea','sesion','sesión',
+            'mesa','informe','atención','atencion','prevención','prevencion'];
+
+/* ---------- NORMALIZE DEPENDENCIAS ---------- */
+function canon(frag){
+  const t = frag.toLowerCase();
+  if(/familia|desarrollo social/.test(t)) return 'Secretaría de Familia';
+  if(/salud/.test(t)) return 'Secretaría de Salud';
+  if(/segurid/.test(t)) return 'Secretaría de Seguridad';
+  if(/desarrollo econ/.test(t)) return 'Sec. Desarrollo Económico';
+  if(/rural|ambiente/.test(t)) return 'Sec. Desarrollo Rural y Ambiente';
+  if(/educaci/.test(t)) return 'Secretaría de Educación';
+  if(/gobierno/.test(t)) return 'Secretaría de Gobierno';
+  if(/consejo/.test(t)) return 'Consejo Mpal. de Juventudes';
+  if(/plataforma/.test(t)) return 'Plataforma Mpal. de Juventudes';
+  if(/casa de la juventud/.test(t)) return 'Casa de la Juventud';
+  if(/imcrdz|instituto|cultura/.test(t)) return 'IMCRDZ';
+  return frag.trim().replace(/^Sec\.?\s*/i,'Secretaría de ');
+}
+function splitDeps(s){
+  if(!s) return [];
+  return s.split(/[–\-—]|,| y (?=Sec|Cons|Plat|Casa|IMC)/i)
+          .map(x=>x.trim()).filter(x=>x.length>2)
+          .map(canon).filter((v,i,a)=>a.indexOf(v)===i);
+}
+
+/* ---------- HEURISTIC ENGINE ---------- */
+function analyze(r){
+  const desc = (r.descripcion||'').toString().trim();
+  const hasDesc = desc.length>0;
+  const meta = num(r.metaIndicador), ejec = num(r.ejecucion);
+  let ratio = null;
+  if(meta!==null && meta>0 && ejec!==null) ratio = ejec/meta;
+
+  // keyword signals
+  const low = desc.toLowerCase();
+  const kws = KW.filter(k=>low.includes(k));
+  const kwSet = new Set();
+  kws.forEach(k=>{
+    if(/socializ/.test(k))kwSet.add('socialización');
+    else if(/articul/.test(k))kwSet.add('articulación');
+    else if(/ejecuc/.test(k))kwSet.add('ejecución');
+    else if(/capacit|formaci/.test(k))kwSet.add('formación');
+    else if(/seguimiento/.test(k))kwSet.add('seguimiento');
+    else if(/particip/.test(k))kwSet.add('participación');
+    else if(/acompañ/.test(k))kwSet.add('acompañamiento');
+    else if(/implement/.test(k))kwSet.add('implementación');
+    else if(/convocat|asamblea|sesion|sesión|jornada/.test(k))kwSet.add('convocatoria');
+    else if(/fortalec/.test(k))kwSet.add('fortalecimiento');
+    else if(/sensibiliz|campañ/.test(k))kwSet.add('sensibilización');
+    else if(/taller|estrategia/.test(k))kwSet.add('estrategia');
+  });
+  const themes = [...kwSet];
+
+  // score
+  let s = 0;
+  if(ratio!==null){ s += ratio>=0.9?3 : ratio>=0.5?2.2 : ratio>0?1.2 : 0; }
+  if(hasDesc){ s += desc.length>450?3 : desc.length>180?2.2 : desc.length>40?1.4 : 0.7; }
+  s += Math.min(themes.length,3)*0.7;
+  if(/se realiz|se llev|se desarroll|se brinda|se cuenta|se promueve|ofrece/.test(low)) s += 1; // evidencia de hecho
+  if(/proyect|programad|dará inicio|a partir de|se encuentra proyectad/.test(low)) s += 0.3; // planeado, no ejecutado
+
+  let avance, color;
+  if(!hasDesc && (ratio===null||ratio===0)){ avance='Sin registro'; color='sin'; }
+  else if(s>=5.2){ avance='Avance Alto'; color='alto'; }
+  else if(s>=2.8){ avance='Avance Medio'; color='medio'; }
+  else { avance='Avance Bajo'; color='bajo'; }
+
+  // pct for bars
+  let pct;
+  if(ratio!==null) pct = Math.min(Math.round(ratio*100),100);
+  else pct = color==='alto'?80:color==='medio'?50:color==='bajo'?22:0;
+
+  // riesgo / impacto / recomendacion
+  const riesgo = color==='alto'?'Bajo':color==='medio'?'Medio':color==='sin'?'Alto':'Alto';
+  const impacto = (themes.includes('articulación')||themes.includes('participación')||themes.includes('fortalecimiento'))&&color==='alto'?'Alto'
+                 : color==='alto'?'Medio-Alto' : color==='medio'?'Medio' : 'Por consolidar';
+
+  const cumplimiento = ratio!==null ? Math.round(ratio*100)+'% de la meta' :
+                       hasDesc ? 'En desarrollo (cualitativo)' : 'Sin reporte';
+
+  return {avance,color,pct,ratio,meta,ejec,hasDesc,themes,riesgo,impacto,cumplimiento,
+          recomendacion:recoText(color,ratio,hasDesc,themes),
+          aiText:indicatorNarrative(r,{avance,color,ratio,hasDesc,themes,meta,ejec})};
+}
+
+function recoText(color,ratio,hasDesc,themes){
+  if(color==='sin') return 'Registrar la descripción de acciones y el dato de ejecución para habilitar la medición.';
+  if(color==='bajo') return 'Priorizar la ejecución y documentar evidencia cuantitativa que respalde el avance.';
+  if(color==='medio'){
+    if(ratio!==null&&ratio<1) return 'Acelerar la ejecución para cerrar la brecha frente a la meta y fortalecer el registro cuantitativo.';
+    return 'Consolidar la evidencia y reforzar el seguimiento para asegurar el cumplimiento de la meta.';
+  }
+  if(themes.includes('articulación')) return 'Mantener la articulación interinstitucional y sistematizar indicadores de impacto.';
+  return 'Sostener el ritmo de ejecución y cuantificar el impacto logrado en la población juvenil.';
+}
+
+/* indicator-level narrative in the requested institutional style */
+function indicatorNarrative(r,a){
+  if(a.color==='sin')
+    return 'No se registra descripción de acciones realizadas para este indicador. Sin evidencia documental no es posible interpretar el nivel de ejecución; se recomienda registrar el relato de la actividad y el dato cuantitativo de avance.';
+  const evid = a.hasDesc ? 'La evidencia registrada' : 'El dato de ejecución reportado';
+  let nivel = a.color==='alto'?'una ejecución consistente y sostenida de las actividades previstas'
+            : a.color==='medio'?'un desarrollo parcial pero verificable de las actividades previstas'
+            : 'un desarrollo inicial de las actividades, aún por consolidar';
+  let rel = a.themes.includes('articulación')
+        ? 'Las acciones evidencian articulación institucional y guardan relación directa con el indicador'
+        : a.themes.length
+        ? 'Las acciones desarrolladas guardan relación con el indicador y aportan a su cumplimiento'
+        : 'Las acciones reportadas se vinculan al objetivo aunque con evidencia cualitativa limitada';
+  let cuant = (a.ratio!==null)
+        ? `El reporte cuantitativo (${a.ejec} de ${a.meta}) ${a.ratio>=1?'alcanza o supera':'aún no alcanza'} la meta proyectada`
+        : 'Se recomienda fortalecer el registro cuantitativo para facilitar la medición del impacto';
+  return `${evid} muestra ${nivel}. ${rel}. ${cuant}.`;
+}
+
+/* ---------- HELPERS ---------- */
+function num(v){ if(v===null||v===undefined||v==='') return null; const n=Number(v); return isNaN(n)?null:n; }
+function esc(s){ return (s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function colorOf(c){ return c==='alto'?'var(--green)':c==='medio'?'var(--yellow)':c==='bajo'?'var(--red)':'#444'; }
+function parseDate(s){ if(!s) return null; const m=String(s).match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/); if(!m) return null; return new Date(+m[3],+m[2]-1,+m[1]); }
+
+/* ---------- DERIVED ---------- */
+function prep(){
+  DATA.forEach((r,i)=>{ r.id=r.id||i+1; r._deps=splitDeps(r.responsable); r._a=analyze(r); });
+}
+function filtered(){
+  return DATA.filter(r=>{
+    if(filters.obj && r.objetivo!==filters.obj) return false;
+    if(filters.dep && !r._deps.includes(filters.dep)) return false;
+    if(filters.ind && r.indicador!==filters.ind) return false;
+    return true;
+  });
+}
+
+/* ============================================================
+   NAVIGATION
+   ============================================================ */
+const PAGES = [
+  {n:1,t:'Resumen Ejecutivo',ic:'<path d="M3 13h4v7H3zM10 4h4v16h-4zM17 9h4v11h-4z"/>'},
+  {n:2,t:'Por Objetivos',ic:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="0.5" fill="currentColor"/>'},
+  {n:3,t:'Por Dependencias',ic:'<path d="M3 21h18M5 21V8l7-5 7 5v13M9 21v-6h6v6"/>'},
+  {n:4,t:'Indicadores',ic:'<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>'},
+  {n:5,t:'Cronograma',ic:'<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4M7 14h6M7 18h4"/>'},
+  {n:6,t:'Narrativa IA',ic:'<path d="M12 2l2 5 5 .5-3.8 3.4L16.5 16 12 13l-4.5 3 1.3-5.1L5 7.5 10 7z"/>'}
+];
+function buildNav(){
+  const nav=document.getElementById('nav');
+  nav.innerHTML=PAGES.map(p=>`<div class="nav-item${p.n===currentPage?' active':''}" data-p="${p.n}">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${p.ic}</svg>
+    <span class="nav-label">${p.t}</span><span class="nav-num">0${p.n}</span></div>`).join('');
+  nav.querySelectorAll('.nav-item').forEach(el=>el.onclick=()=>goPage(+el.dataset.p));
+}
+function goPage(n){
+  currentPage=n;
+  document.querySelectorAll('.nav-item').forEach(e=>e.classList.toggle('active',+e.dataset.p===n));
+  const p=PAGES.find(x=>x.n===n);
+  document.getElementById('pageTitle').innerHTML=`<b>0${n}</b> ${p.t}`;
+  render();
+}
+
+/* ============================================================
+   FILTERS
+   ============================================================ */
+function buildFilters(){
+  const objs=[...new Set(DATA.map(r=>r.objetivo).filter(Boolean))].sort();
+  const deps=[...new Set(DATA.flatMap(r=>r._deps))].sort();
+  const inds=[...new Set(DATA.map(r=>r.indicador).filter(Boolean))].sort();
+  fill('fObj',objs,'Todos los objetivos');
+  fill('fDep',deps,'Todas las dependencias');
+  fill('fInd',inds,'Todos los indicadores');
+}
+function fill(id,arr,all){
+  const s=document.getElementById(id);
+  s.innerHTML=`<option value="">${all}</option>`+arr.map(v=>`<option value="${esc(v)}">${esc(v.length>46?v.slice(0,44)+'…':v)}</option>`).join('');
+}
+function bindFilters(){
+  ['fObj','fDep','fInd'].forEach((id,i)=>{
+    document.getElementById(id).onchange=e=>{
+      filters[['obj','dep','ind'][i]]=e.target.value; render();
+    };
+  });
+  document.getElementById('btnClear').onclick=()=>{
+    filters.obj=filters.dep=filters.ind='';
+    ['fObj','fDep','fInd'].forEach(id=>document.getElementById(id).value='');
+    render();
+  };
+}
+
+/* ============================================================
+   RENDER ROUTER
+   ============================================================ */
+function render(){
+  const c=document.getElementById('content');
+  const d=filtered();
+  if(currentPage===1) renderResumen(c,d);
+  else if(currentPage===2) renderObjetivos(c,d);
+  else if(currentPage===3) renderDependencias(c,d);
+  else if(currentPage===4) renderIndicadores(c,d);
+  else if(currentPage===5) renderCronograma(c,d);
+  else if(currentPage===6) renderNarrativa(c,d);
+  requestAnimationFrame(()=>document.querySelectorAll('.kpi').forEach((k,i)=>setTimeout(()=>k.classList.add('in'),i*70)));
+}
+
+/* ---------- PAGE 1: RESUMEN ---------- */
+function renderResumen(c,d){
+  const acciones=d.length;
+  const objetivos=new Set(d.map(r=>r.objetivo).filter(Boolean)).size;
+  const deps=new Set(d.flatMap(r=>r._deps)).size;
+  const inds=new Set(d.map(r=>r.indicador).filter(Boolean)).size;
+  const conDesc=d.filter(r=>r._a.hasDesc).length;
+  const lineas=objetivos;
+  const dist=countAvance(d);
+
+  c.innerHTML=`
+  <div class="tag green">⚡ ¿Cómo va el Plan de Acción?</div>
+  <div id="aiSlot"></div>
+
+  <div class="section-gap"></div>
+  <div class="kpi-grid">
+    ${kpi('Acciones registradas',acciones,'<path d="M9 11l3 3L22 4M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>','var(--yellow)',conDesc+' con descripción')}
+    ${kpi('Objetivos estratégicos',objetivos,'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/>','var(--green)','del Plan 2026')}
+    ${kpi('Dependencias',deps,'<path d="M3 21h18M5 21V8l7-5 7 5v13"/>','var(--white)','participantes')}
+    ${kpi('Líneas estratégicas',lineas,'<path d="M4 19h16M4 5v14M8 13l3-3 2 2 5-5"/>','var(--yellow)','en seguimiento')}
+    ${kpi('Indicadores',inds,'<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>','var(--green)','definidos')}
+    ${kpi('Con descripción',conDesc,'<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M9 13h6M9 17h4"/>','var(--white)',pct(conDesc,acciones)+'% del total')}
+  </div>
+
+  <div class="section-gap"></div>
+  <div class="panel">
+    <div class="panel-h g"><span class="dot"></span>Estado de ejecución del plan</div>
+    ${statusBar(dist,d.length)}
+  </div>
+
+  <div class="section-gap"></div>
+  <div class="grid2">
+    <div class="panel"><div class="panel-h"><span class="dot"></span>Acciones por dependencia</div><div class="chart-wrap"><canvas id="chDep"></canvas></div></div>
+    <div class="panel"><div class="panel-h g"><span class="dot"></span>Acciones por objetivo</div><div class="chart-wrap"><canvas id="chObj"></canvas></div></div>
+  </div>
+  <div class="section-gap"></div>
+  <div class="panel"><div class="panel-h"><span class="dot"></span>Nivel de avance por objetivo (interpretado)</div><div class="chart-wrap"><canvas id="chAvance"></canvas></div></div>
+
+  <div class="section-gap"></div>
+  <div class="panel"><div class="panel-h g"><span class="dot"></span>Cronograma resumido</div>${miniTimeline(d)}</div>
+  `;
+  renderAISlot('aiSlot','resumen',d);
+  drawDepChart(d); drawObjChart(d); drawAvanceChart(d);
+}
+
+function kpi(lab,val,ic,col,sub){
+  return `<div class="kpi" style="--accent:${col}">
+    <div class="kpi-ico" style="--accent:${col}"><svg viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ic}</svg></div>
+    <div class="kpi-val" data-count="${val}">0</div>
+    <div class="kpi-lab">${lab}</div>${sub?`<div class="kpi-sub">${sub}</div>`:''}</div>`;
+}
+function pct(a,b){ return b?Math.round(a/b*100):0; }
+
+function countAvance(d){
+  const o={alto:0,medio:0,bajo:0,sin:0};
+  d.forEach(r=>o[r._a.color]++); return o;
+}
+function statusBar(o,total){
+  const seg=(k,c,lab)=>{ const w=total?o[k]/total*100:0; return w>0?`<div style="width:${w}%;background:${c};height:100%;display:grid;place-items:center;border-right:2px solid #000" title="${lab}: ${o[k]}">${w>9?`<span style="font-weight:900;font-size:13px;color:#000">${o[k]}</span>`:''}</div>`:''; };
+  return `<div style="display:flex;height:46px;border:2.5px solid #000;border-radius:12px;overflow:hidden;box-shadow:var(--shadow-sm)">
+    ${seg('alto','var(--green)','Alto')}${seg('medio','var(--yellow)','Medio')}${seg('bajo','var(--red)','Bajo')}${seg('sin','#3a3a40','Sin registro')}
+  </div>
+  <div style="display:flex;gap:18px;margin-top:14px;flex-wrap:wrap;font-size:12px;font-weight:600">
+    <span><span class="sem alto" style="vertical-align:middle"></span> Avance alto: <b style="color:var(--green)">${o.alto}</b></span>
+    <span><span class="sem medio" style="vertical-align:middle"></span> Medio: <b style="color:var(--yellow)">${o.medio}</b></span>
+    <span><span class="sem bajo" style="vertical-align:middle"></span> Bajo: <b style="color:var(--red)">${o.bajo}</b></span>
+    <span><span class="sem sin" style="vertical-align:middle"></span> Sin registro: <b style="color:var(--muted)">${o.sin}</b></span>
+  </div>`;
+}
+
+function miniTimeline(d){
+  const withDates=d.filter(r=>parseDate(r.fechaInicio)&&parseDate(r.fechaFin));
+  if(!withDates.length) return `<div class="empty-state" style="padding:24px">Sin fechas registradas para el filtro actual.</div>`;
+  const months=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  const y0=new Date(2026,0,1).getTime(), y1=new Date(2026,11,31).getTime(), span=y1-y0;
+  const now=new Date().getTime(); const nowPct=Math.max(0,Math.min(100,(now-y0)/span*100));
+  const rows=withDates.slice(0,8).map(r=>{
+    const s=Math.max(y0,parseDate(r.fechaInicio).getTime()), e=Math.min(y1,parseDate(r.fechaFin).getTime());
+    const left=(s-y0)/span*100, w=Math.max(2,(e-s)/span*100);
+    return `<div style="display:grid;grid-template-columns:200px 1fr;align-items:center;gap:10px;margin-bottom:8px">
+      <div style="font-size:11px;color:var(--muted);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.accion||r.objetivo)}</div>
+      <div style="position:relative;height:18px;background:var(--ink2);border-radius:6px;border:1.5px solid var(--line)">
+        <div style="position:absolute;left:${left}%;width:${w}%;height:100%;background:${colorOf(r._a.color)};border-radius:6px;border:1.5px solid #000"></div>
+      </div></div>`;
+  }).join('');
+  return `<div style="display:grid;grid-template-columns:200px 1fr;margin-bottom:10px;gap:10px">
+      <div></div><div style="display:grid;grid-template-columns:repeat(12,1fr);font-size:9px;color:var(--muted2);font-weight:700">${months.map(m=>`<span style="text-align:center">${m}</span>`).join('')}</div>
+    </div>
+    <div style="position:relative">${rows}
+      <div style="position:absolute;top:-26px;bottom:0;left:calc(210px + (100% - 210px) * ${(nowPct/100).toFixed(4)});width:2px;background:var(--yellow);box-shadow:0 0 8px var(--yellow)"><span style="position:absolute;top:-4px;left:-14px;font-size:8px;color:var(--yellow);font-weight:800;white-space:nowrap">HOY</span></div>
+    </div>
+    ${withDates.length>8?`<div style="font-size:11px;color:var(--muted);margin-top:8px">+ ${withDates.length-8} actividades más en la página Cronograma →</div>`:''}`;
+}
+
+/* ---------- PAGE 2: OBJETIVOS ---------- */
+function renderObjetivos(c,d){
+  const groups=groupBy(d,'objetivo');
+  c.innerHTML=`<div class="tag">⚡ Seguimiento por objetivos estratégicos</div>
+    <div id="aiSlot"></div><div class="section-gap"></div><div class="acc" id="accObj"></div>`;
+  renderAISlot('aiSlot','objetivos',d);
+  const wrap=document.getElementById('accObj');
+  const keys=Object.keys(groups).sort((a,b)=>avgPct(groups[b])-avgPct(groups[a]));
+  wrap.innerHTML=keys.map((k,i)=>{
+    const g=groups[k]; const ap=avgPct(g); const col=ap>=66?'alto':ap>=35?'medio':'bajo';
+    const deps=[...new Set(g.flatMap(r=>r._deps))]; const inds=new Set(g.map(r=>r.indicador)).size;
+    const dist=countAvance(g);
+    return `<div class="acc-card" data-i="${i}">
+      <div class="acc-top" onclick="this.parentNode.classList.toggle('open')">
+        <div class="acc-rank ${i===1?'r2':i===2?'r3':''}">${i+1}</div>
+        <div class="acc-info">
+          <div class="acc-name">${esc(k)}</div>
+          <div class="acc-meta">
+            <span class="mini"><b>${g.length}</b> actividades</span>
+            <span class="mini"><b>${inds}</b> indicadores</span>
+            <span class="mini"><b>${deps.length}</b> dependencias</span>
+            <span class="chip ${col}">${col==='alto'?'Avance Alto':col==='medio'?'Avance Medio':'Avance Bajo'}</span>
+          </div>
+        </div>
+        <div class="acc-prog">
+          <div class="acc-pct" style="color:${colorOf(col)}">${ap}%</div>
+          <div class="acc-bar"><i style="width:${ap}%;background:${colorOf(col)}"></i></div>
+        </div>
+        <svg class="acc-caret" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+      <div class="acc-body"><div class="acc-body-in">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">${deps.map(x=>`<span class="chip ghost">${esc(x)}</span>`).join('')}</div>
+        <div class="ind-ai" style="margin-bottom:16px"><strong style="color:var(--yellow)">Lectura IA del objetivo:</strong> ${objNarrative(k,g,dist)}</div>
+        <table class="tbl"><thead><tr><th>Actividad</th><th>Indicador</th><th>Avance</th><th style="text-align:right">Meta</th></tr></thead><tbody>
+        ${g.map(r=>`<tr><td><b>${esc((r.accion||'').slice(0,70))}</b></td><td>${esc((r.indicador||'').slice(0,50))}</td><td><span class="chip ${r._a.color}" style="font-size:9.5px">${r._a.avance}</span></td><td style="text-align:right">${r._a.ejec??'–'} / ${r._a.meta??'–'}</td></tr>`).join('')}
+        </tbody></table>
+      </div></div>
+    </div>`;
+  }).join('');
+}
+function objNarrative(name,g,dist){
+  const ap=avgPct(g); const total=g.length;
+  const ex=g.filter(r=>r._a.color==='alto'||r._a.color==='medio').length;
+  const themes=[...new Set(g.flatMap(r=>r._a.themes))].slice(0,4);
+  const nivel=ap>=66?'un nivel de avance alto':ap>=35?'un avance medio en consolidación':'un avance todavía incipiente';
+  let t=`El objetivo registra ${nivel} (${ap}% promedio sobre meta). De ${total} actividad${total>1?'es':''}, ${ex} presenta${ex===1?'':'n'} ejecución documentada`;
+  if(themes.length) t+=`, con énfasis en ${themes.join(', ')}`;
+  t+='. ';
+  if(dist.sin>0) t+=`Quedan ${dist.sin} actividad${dist.sin>1?'es sin':' sin'} descripción registrada, lo que limita la medición. `;
+  t+= ap>=66?'Se recomienda sostener el ritmo y cuantificar el impacto.':
+       ap>=35?'Se recomienda reforzar el registro de evidencia y acelerar lo pendiente.':
+       'Requiere priorización y registro de avances en la próxima sesión de seguimiento.';
+  return t;
+}
+
+/* ---------- PAGE 3: DEPENDENCIAS ---------- */
+function renderDependencias(c,d){
+  const map={};
+  d.forEach(r=>r._deps.forEach(dep=>{ (map[dep]=map[dep]||[]).push(r); }));
+  const keys=Object.keys(map).sort((a,b)=>map[b].length-map[a].length||avgPct(map[b])-avgPct(map[a]));
+  c.innerHTML=`<div class="tag green">⚡ Ranking de dependencias por participación</div>
+    <div id="aiSlot"></div><div class="section-gap"></div>
+    <div class="panel" style="margin-bottom:18px"><div class="panel-h"><span class="dot"></span>Participación en actividades</div><div class="chart-wrap sm"><canvas id="chRank"></canvas></div></div>
+    <div class="acc" id="accDep"></div>`;
+  renderAISlot('aiSlot','dependencias',d);
+  drawRankChart(map,keys);
+  document.getElementById('accDep').innerHTML=keys.map((k,i)=>{
+    const g=map[k]; const ap=avgPct(g); const col=ap>=66?'alto':ap>=35?'medio':'bajo';
+    const inds=new Set(g.map(r=>r.indicador)).size; const ejec=g.filter(r=>r._a.hasDesc).length;
+    return `<div class="acc-card">
+      <div class="acc-top" onclick="this.parentNode.classList.toggle('open')">
+        <div class="acc-rank ${i===1?'r2':i===2?'r3':''}">${i+1}</div>
+        <div class="acc-info"><div class="acc-name">${esc(k)}</div>
+          <div class="acc-meta"><span class="mini"><b>${g.length}</b> actividades</span><span class="mini"><b>${inds}</b> indicadores</span><span class="mini"><b>${ejec}</b> con evidencia</span></div></div>
+        <div class="acc-prog"><div class="acc-pct" style="color:${colorOf(col)}">${ap}%</div><div class="acc-bar"><i style="width:${ap}%;background:${colorOf(col)}"></i></div></div>
+        <svg class="acc-caret" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+      <div class="acc-body"><div class="acc-body-in">
+        <div class="ind-ai" style="margin-bottom:14px"><strong style="color:var(--green)">Conclusión IA:</strong> ${depNarrative(k,g)}</div>
+        <table class="tbl"><thead><tr><th>Actividad</th><th>Avance</th><th style="text-align:right">Ejec.</th></tr></thead><tbody>
+        ${g.map(r=>`<tr><td>${esc((r.accion||'').slice(0,75))}</td><td><span class="chip ${r._a.color}" style="font-size:9.5px">${r._a.avance}</span></td><td style="text-align:right">${r._a.ejec??'–'}/${r._a.meta??'–'}</td></tr>`).join('')}
+        </tbody></table>
+      </div></div></div>`;
+  }).join('');
+}
+function depNarrative(name,g){
+  const ap=avgPct(g); const ev=g.filter(r=>r._a.hasDesc).length;
+  const themes=[...new Set(g.flatMap(r=>r._a.themes))].slice(0,3);
+  let t=`${name} lidera o participa en ${g.length} actividad${g.length>1?'es':''} del plan, con ${ev} respaldada${ev===1?'':'s'} por evidencia documental y un avance promedio del ${ap}%`;
+  if(themes.length) t+=`. Su trabajo se concentra en ${themes.join(', ')}`;
+  t+='. ';
+  t+= ap>=60?'Muestra un rol activo y articulado dentro de la Comisión.':
+       ap>=35?'Mantiene una participación constante que conviene fortalecer con más registro cuantitativo.':
+       'Se recomienda impulsar la ejecución y el reporte de sus actividades.';
+  return t;
+}
+
+/* ---------- PAGE 4: INDICADORES ---------- */
+function renderIndicadores(c,d){
+  if(!d.length){ c.innerHTML=emptyState('No hay indicadores para el filtro seleccionado'); return; }
+  c.innerHTML=`<div class="tag">⚡ Tablero de indicadores · análisis IA por acción</div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:20px;font-weight:500">Cada tarjeta interpreta el cumplimiento, riesgo, impacto y recomendación a partir de la <b style="color:var(--white)">Descripción de Acciones Realizadas</b>. Usa <b style="color:var(--green)">⚡ Profundizar IA</b> para un análisis en vivo.</div>
+    <div class="ind-grid">${d.map((r,i)=>indCard(r,i)).join('')}</div>`;
+  c.querySelectorAll('[data-aibtn]').forEach(b=>b.onclick=()=>deepAnalyze(b));
+}
+function indCard(r,i){
+  const a=r._a; const ac=colorOf(a.color);
+  const desc=r.descripcion?esc(r.descripcion):'Sin descripción de acciones registrada para este indicador.';
+  return `<div class="ind-card" style="--ac:${ac}">
+    <div class="ind-head">
+      <div class="ind-name">${esc(r.indicador||'Indicador sin nombre')}</div>
+      <span class="sem ${a.color}" title="${a.avance}"></span>
+    </div>
+    <div class="ind-obj">🎯 ${esc((r.objetivo||'').slice(0,60))}</div>
+    <div>
+      <div style="font-size:9.5px;color:var(--green);font-weight:800;text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px;padding-left:6px">Acciones realizadas</div>
+      <div class="ind-desc${r.descripcion?'':' empty'}">${desc}</div>
+    </div>
+    <div>
+      <div style="font-size:9.5px;color:var(--yellow);font-weight:800;text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px;padding-left:6px">Análisis IA</div>
+      <div class="ind-ai" data-aitext>${esc(a.aiText)}</div>
+    </div>
+    <div class="ind-metrics">
+      <div class="metric"><div class="ml">Cumplimiento</div><div class="mv">${esc(a.cumplimiento)}</div></div>
+      <div class="metric"><div class="ml">Nivel de impacto</div><div class="mv">${a.impacto}</div></div>
+      <div class="metric"><div class="ml">Riesgo</div><div class="mv"><span class="sem ${a.riesgo==='Bajo'?'alto':a.riesgo==='Medio'?'medio':'bajo'}"></span>${a.riesgo}</div></div>
+      <div class="metric"><div class="ml">Semáforo</div><div class="mv"><span class="chip ${a.color}" style="font-size:9px">${a.avance}</span></div></div>
+    </div>
+    <div class="metric"><div class="ml">Recomendación</div><div style="font-size:11.5px;color:#D5D5D9;margin-top:3px;line-height:1.45">${esc(a.recomendacion)}</div></div>
+    <div class="ind-foot">
+      <span class="mini">${esc((r._deps[0]||'').slice(0,26))}</span>
+      <button class="btn-ai" data-aibtn data-id="${r.id}">⚡ Profundizar IA</button>
+    </div>
+  </div>`;
+}
+
+/* ---------- PAGE 5: CRONOGRAMA ---------- */
+function renderCronograma(c,d){
+  const withD=d.filter(r=>parseDate(r.fechaInicio)&&parseDate(r.fechaFin));
+  const months=['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
+  const y0=new Date(2026,0,1).getTime(), y1=new Date(2027,0,1).getTime(), span=y1-y0;
+  const now=Date.now(); const nowPct=Math.max(0,Math.min(100,(now-y0)/span*100));
+  c.innerHTML=`<div class="tag green">⚡ Cronograma 2026 · vista Gantt</div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:18px;font-weight:500">Barras coloreadas por nivel de avance interpretado. Pasa el cursor para ver el detalle. Filtra arriba por dependencia, objetivo o indicador.</div>
+    <div class="gantt">
+      <div class="gantt-head"><div class="gh-l">Actividad</div><div class="gantt-months">${months.map(m=>`<div class="gm">${m}</div>`).join('')}</div></div>
+      <div id="ganttRows" style="position:relative">
+        <div style="position:absolute;top:0;bottom:0;left:calc(230px + (100% - 230px) * ${(nowPct/100).toFixed(4)});width:2px;background:var(--yellow);z-index:6;box-shadow:0 0 8px var(--yellow)"></div>
+        ${withD.length?withD.map(r=>{
+          const s=Math.max(y0,parseDate(r.fechaInicio).getTime()), e=Math.min(y1,parseDate(r.fechaFin).getTime());
+          const left=(s-y0)/span*100, w=Math.max(3,(e-s)/span*100);
+          const lab=(r.accion||r.objetivo||'').slice(0,46);
+          return `<div class="gantt-row">
+            <div class="gr-l"><span class="sem ${r._a.color}"></span>${esc(lab)}</div>
+            <div class="gr-track">${Array(12).fill('<div class="gcol"></div>').join('')}
+              <div class="gbar" style="left:${left}%;width:${w}%;background:${colorOf(r._a.color)}"
+                data-tt="<b>${esc((r.accion||'').slice(0,80))}</b><br>${esc(r.fechaInicio)} → ${esc(r.fechaFin)}<br>Avance: ${r._a.avance} · ${r._a.ejec??'–'}/${r._a.meta??'–'}">
+                ${w>14?esc((r.indicador||'').slice(0,22)):''}</div>
+            </div></div>`;
+        }).join(''):`<div class="empty-state">Sin actividades con fechas para el filtro actual.</div>`}
+      </div>
+    </div>`;
+  bindTooltips();
+}
+
+/* ---------- PAGE 6: NARRATIVA IA ---------- */
+function renderNarrativa(c,d){
+  c.innerHTML=`<div class="tag">⚡ Narrativa IA · lectura integral del plan</div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:20px;font-weight:500">Análisis argumentado generado a partir de la columna <b style="color:var(--white)">Descripción de Acciones Realizadas</b> de las acciones filtradas. Responde las preguntas clave de seguimiento de la Comisión.</div>
+    <div id="aiSlot"></div>`;
+  renderAISlot('aiSlot','narrativa',d,true);
+}
+
+/* ============================================================
+   AI SLOT (live Claude + heuristic fallback)
+   ============================================================ */
+function renderAISlot(id,kind,d,big){
+  const el=document.getElementById(id); if(!el) return;
+  const key=kind+'|'+JSON.stringify(filters);
+  el.innerHTML=`<div class="ai-panel">
+    <div class="ai-head">
+      <div class="ai-orb"><svg viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2"><path d="M12 2l2 5 5 .5-3.8 3.4L16.5 16 12 13l-4.5 3 1.3-5.1L5 7.5 10 7z"/></svg></div>
+      <div><div class="ai-title">Análisis <b>IA</b></div><div style="font-size:10.5px;color:var(--muted);font-weight:600">${aiSub(kind,d.length)}</div></div>
+      <div class="ai-chip load" id="${id}-chip">● Procesando</div>
+      <div class="ai-regen" id="${id}-regen" title="Regenerar análisis"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.5 9a9 9 0 0114.9-3.4L23 10M1 14l4.6 4.4A9 9 0 0020.5 15"/></svg></div>
+    </div>
+    <div class="ai-body" id="${id}-body">${shimmer(big?7:5)}</div>
+  </div>`;
+  document.getElementById(id+'-regen').onclick=()=>{ delete aiCache[key]; runAI(id,kind,d,key); };
+  if(aiCache[key]){ paintAI(id,aiCache[key].html,aiCache[key].live); }
+  else { runAI(id,kind,d,key); }
+}
+function aiSub(k,n){
+  const m={resumen:'Resumen ejecutivo del avance general',objetivos:'Lectura por objetivos estratégicos',
+    dependencias:'Lectura por dependencias',narrativa:'Conclusiones para la próxima sesión'};
+  return (m[k]||'')+` · ${n} acciones en alcance`;
+}
+function shimmer(n){ return Array(n).fill(0).map((_,i)=>`<div class="shimmer-line" style="width:${[100,92,96,70,88,94,60][i%7]}%"></div>`).join(''); }
+
+function runAI(id,kind,d,key){
+  const chip=document.getElementById(id+'-chip');
+  if(chip){chip.className='ai-chip load';chip.textContent='● Procesando';}
+  if(aiDebounce) clearTimeout(aiDebounce);
+  aiDebounce=setTimeout(async()=>{
+    let html=null, live=false;
+    try{ html=await callClaude(kind,d); live=true; }
+    catch(e){ html=heuristicNarrative(kind,d); live=false; }
+    if(!html){ html=heuristicNarrative(kind,d); live=false; }
+    aiCache[key]={html,live};
+    paintAI(id,html,live);
+  },350);
+}
+function paintAI(id,html,live){
+  const body=document.getElementById(id+'-body'), chip=document.getElementById(id+'-chip');
+  if(body) body.innerHTML=html;
+  if(chip){ chip.className='ai-chip '+(live?'live':'off'); chip.textContent=live?'⚡ IA en vivo':'◆ Análisis automático'; }
+}
+
+/* ---- live Claude call ---- */
+async function callClaude(kind,d){
+  const ctx=buildContext(d);
+  const sys=`Eres un consultor senior en Business Intelligence y análisis de políticas públicas de juventud, evaluando el Plan de Acción de la Comisión de Concertación y Decisión Juvenil (CCyD) de Zipaquirá. Analizas EXCLUSIVAMENTE la información entregada (no inventes datos, cifras ni dependencias). Interpretas el avance: nivel de ejecución, calidad, cumplimiento frente al objetivo, riesgos, pendientes, impacto y coherencia entre indicador y acciones. Escribe en español, tono ejecutivo y claro, sin relleno. Usa SOLO etiquetas HTML simples: <h4>, <p>, <ul>, <li>, <strong>. No uses markdown ni bloques de código.`;
+  const ask={
+    resumen:`Redacta el ANÁLISIS EJECUTIVO del avance general. Incluye con <h4>: "Panorama general", "Fortalezas", "Acciones con mayor desarrollo", "Requieren seguimiento", "Dependencias con mayor participación", "Recomendaciones". Sé conciso (máx ~280 palabras).`,
+    objetivos:`Analiza el avance POR OBJETIVOS. Con <h4> separa: "Objetivos más avanzados", "Objetivos rezagados", "Coherencia indicador–acción", "Recomendación". Máx ~240 palabras.`,
+    dependencias:`Analiza el desempeño POR DEPENDENCIAS. Con <h4>: "Dependencias líderes", "Articulación interinstitucional", "Dependencias por activar", "Recomendación". Máx ~240 palabras.`,
+    narrativa:`Genera una NARRATIVA argumentada respondiendo, cada una con su <h4>: "¿En qué se ha concentrado el trabajo?", "Acciones de mayor impacto", "Temas recurrentes", "Dependencias que lideran", "Riesgos identificados", "Actividades posiblemente retrasadas", "Recomendaciones para la próxima sesión", "Acciones a priorizar". Argumenta con base en las descripciones. Máx ~360 palabras.`
+  }[kind];
+  const resp=await fetch("https://api.anthropic.com/v1/messages",{
+    method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({model:"claude-sonnet-4-6",max_tokens:1000,system:sys,
+      messages:[{role:"user",content:ask+"\n\n=== DATOS DEL PLAN (acciones en alcance) ===\n"+ctx}]})
+  });
+  if(!resp.ok) throw new Error('http '+resp.status);
+  const data=await resp.json();
+  const txt=data.content.filter(b=>b.type==='text').map(b=>b.text).join('\n').trim();
+  if(!txt) throw new Error('empty');
+  return sanitizeAI(txt);
+}
+function buildContext(d){
+  return d.map((r,i)=>{
+    const a=r._a;
+    return `#${i+1} OBJETIVO: ${r.objetivo||'-'}
+ACTIVIDAD: ${r.accion||'-'} | INDICADOR: ${r.indicador||'-'} | RESPONSABLE: ${r.responsable||'-'}
+META: ${r.metaIndicador??'-'} EJECUCIÓN: ${r.ejecucion??'-'} | AVANCE_AUTO: ${a.avance}
+DESCRIPCIÓN DE ACCIONES REALIZADAS: ${r.descripcion||'(sin registro)'}`;
+  }).join('\n---\n').slice(0,14000);
+}
+function sanitizeAI(t){
+  t=t.replace(/```html|```/g,'').trim();
+  if(!/<h4|<p|<ul|<li/.test(t)) t='<p>'+t.replace(/\n{2,}/g,'</p><p>').replace(/\n/g,'<br>')+'</p>';
+  return t;
+}
+
+/* ---- heuristic narrative fallback (siempre funciona, también offline) ---- */
+function heuristicNarrative(kind,d){
+  if(!d.length) return '<p>No hay acciones en el alcance del filtro actual.</p>';
+  const dist=countAvance(d);
+  const depMap={}; d.forEach(r=>r._deps.forEach(x=>depMap[x]=(depMap[x]||0)+1));
+  const topDeps=Object.entries(depMap).sort((a,b)=>b[1]-a[1]).slice(0,3);
+  const themes={}; d.forEach(r=>r._a.themes.forEach(t=>themes[t]=(themes[t]||0)+1));
+  const topThemes=Object.entries(themes).sort((a,b)=>b[1]-a[1]).slice(0,4).map(x=>x[0]);
+  const best=d.filter(r=>r._a.color==='alto').slice(0,3);
+  const watch=d.filter(r=>r._a.color==='bajo'||r._a.color==='sin').slice(0,3);
+  const avg=avgPct(d);
+
+  if(kind==='resumen'){
+    return `<h4>Panorama general</h4><p>El plan registra <strong>${d.length} acciones</strong> con un avance promedio del <strong>${avg}%</strong> frente a las metas: ${dist.alto} con avance alto, ${dist.medio} medio, ${dist.bajo} bajo y ${dist.sin} sin descripción registrada. ${topThemes.length?`El trabajo se concentra en <strong>${topThemes.join(', ')}</strong>.`:''}</p>
+    <h4>Fortalezas</h4><ul>${best.map(r=>`<li>${esc((r.accion||r.indicador).slice(0,90))}</li>`).join('')||'<li>Articulación interinstitucional evidenciada en varias acciones.</li>'}</ul>
+    <h4>Requieren seguimiento</h4><ul>${watch.map(r=>`<li>${esc((r.accion||r.indicador).slice(0,90))} — ${r._a.hasDesc?'avance por consolidar':'sin descripción registrada'}</li>`).join('')||'<li>Sin alertas críticas en el alcance actual.</li>'}</ul>
+    <h4>Dependencias con mayor participación</h4><ul>${topDeps.map(x=>`<li><strong>${esc(x[0])}</strong> — ${x[1]} actividades</li>`).join('')}</ul>
+    <h4>Recomendaciones</h4><p>Fortalecer el registro cuantitativo de las acciones sin dato de ejecución y sistematizar evidencia de impacto para la próxima sesión de seguimiento de la Comisión.</p>`;
+  }
+  if(kind==='objetivos'){
+    const g=groupBy(d,'objetivo'); const ks=Object.keys(g).sort((a,b)=>avgPct(g[b])-avgPct(g[a]));
+    return `<h4>Objetivos más avanzados</h4><ul>${ks.slice(0,3).map(k=>`<li><strong>${esc(k.slice(0,70))}</strong> — ${avgPct(g[k])}%</li>`).join('')}</ul>
+    <h4>Objetivos rezagados</h4><ul>${ks.slice(-3).reverse().map(k=>`<li>${esc(k.slice(0,70))} — ${avgPct(g[k])}%</li>`).join('')}</ul>
+    <h4>Coherencia indicador–acción</h4><p>Las descripciones disponibles guardan relación con sus indicadores; las brechas se concentran donde falta el dato cuantitativo de ejecución.</p>
+    <h4>Recomendación</h4><p>Acelerar los objetivos rezagados y cuantificar el impacto de los más avanzados.</p>`;
+  }
+  if(kind==='dependencias'){
+    return `<h4>Dependencias líderes</h4><ul>${topDeps.map(x=>`<li><strong>${esc(x[0])}</strong> — ${x[1]} actividades</li>`).join('')}</ul>
+    <h4>Articulación interinstitucional</h4><p>Varias acciones se ejecutan de forma conjunta entre secretarías, el Consejo de Juventudes y la Casa de la Juventud, lo que evidencia trabajo en red.</p>
+    <h4>Recomendación</h4><p>Activar a las dependencias con menor reporte y mantener la articulación en las acciones de mayor impacto.</p>`;
+  }
+  // narrativa
+  return `<h4>¿En qué se ha concentrado el trabajo?</h4><p>El esfuerzo de la Comisión se concentra en <strong>${topThemes.join(', ')||'gestión institucional y participación juvenil'}</strong>, con ${d.length} acciones en seguimiento.</p>
+  <h4>Acciones de mayor impacto</h4><ul>${best.map(r=>`<li>${esc((r.accion||r.indicador).slice(0,90))}</li>`).join('')||'<li>Acciones de articulación en Casa de la Juventud y salud mental.</li>'}</ul>
+  <h4>Temas recurrentes</h4><p>${topThemes.join(', ')||'articulación, participación y formación'}.</p>
+  <h4>Dependencias que lideran</h4><p>${topDeps.map(x=>esc(x[0])+' ('+x[1]+')').join(', ')}.</p>
+  <h4>Riesgos identificados</h4><p>${dist.sin} acciones sin descripción y ${dist.bajo} con avance bajo representan el principal riesgo de subregistro y retraso.</p>
+  <h4>Actividades posiblemente retrasadas</h4><ul>${watch.map(r=>`<li>${esc((r.accion||r.indicador).slice(0,90))}</li>`).join('')||'<li>Sin retrasos evidentes en el alcance actual.</li>'}</ul>
+  <h4>Recomendaciones para la próxima sesión</h4><p>Priorizar el cierre de brechas cuantitativas, documentar evidencia de impacto y dar impulso a las acciones rezagadas.</p>`;
+}
+
+/* ---- per-card deep analysis ---- */
+async function deepAnalyze(btn){
+  const r=DATA.find(x=>String(x.id)===btn.dataset.id); if(!r) return;
+  const card=btn.closest('.ind-card'); const slot=card.querySelector('[data-aitext]');
+  btn.disabled=true; btn.textContent='⚡ Analizando…';
+  const old=slot.innerHTML; slot.innerHTML=shimmer(3);
+  try{
+    const sys=`Eres consultor senior en evaluación de políticas públicas de juventud. Analiza SOLO la información dada de UNA acción del Plan de Acción de la CCyD de Zipaquirá. Devuelve un párrafo ejecutivo (máx 90 palabras) interpretando: nivel de ejecución, coherencia indicador-acción, riesgo, impacto y una recomendación concreta. Español, sin markdown, sin viñetas, solo texto.`;
+    const u=`INDICADOR: ${r.indicador}\nOBJETIVO: ${r.objetivo}\nRESPONSABLE: ${r.responsable}\nMETA: ${r.metaIndicador} EJECUCIÓN: ${r.ejecucion}\nDESCRIPCIÓN DE ACCIONES REALIZADAS: ${r.descripcion||'(sin registro)'}`;
+    const resp=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({model:"claude-sonnet-4-6",max_tokens:1000,system:sys,messages:[{role:"user",content:u}]})});
+    if(!resp.ok) throw 0;
+    const data=await resp.json();
+    const t=data.content.filter(b=>b.type==='text').map(b=>b.text).join(' ').trim();
+    slot.innerHTML=t?esc(t).replace(/\n/g,'<br>'):old;
+    slot.style.borderLeftColor='var(--yellow)';
+    btn.textContent='✓ Analizado'; toast('Análisis IA generado');
+  }catch(e){
+    slot.innerHTML=old; btn.disabled=false; btn.textContent='⚡ Profundizar IA';
+    toast('IA no disponible — se muestra el análisis automático');
+  }
+}
+
+/* ============================================================
+   CHARTS
+   ============================================================ */
+let charts={};
+Chart.defaults.color='#8C8C93'; Chart.defaults.font.family='Poppins'; Chart.defaults.font.weight='600';
+const PAL=['#F4E500','#2BE86B','#FFFFFF','#F4A300','#9B8CFF','#FF4D5E','#3DD6F4','#FF8AC4','#B6E84C'];
+function destroy(id){ if(charts[id]){charts[id].destroy();delete charts[id];} }
+
+function drawDepChart(d){
+  const m={}; d.forEach(r=>r._deps.forEach(x=>m[x]=(m[x]||0)+1));
+  const e=Object.entries(m).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  destroy('chDep');
+  charts.chDep=new Chart(document.getElementById('chDep'),{type:'doughnut',
+    data:{labels:e.map(x=>x[0]),datasets:[{data:e.map(x=>x[1]),backgroundColor:PAL,borderColor:'#000',borderWidth:2.5,hoverOffset:8}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'58%',
+      plugins:{legend:{position:'right',labels:{boxWidth:12,padding:9,font:{size:10.5}}}}}});
+}
+function drawObjChart(d){
+  const m={}; d.forEach(r=>{if(r.objetivo)m[r.objetivo]=(m[r.objetivo]||0)+1;});
+  const e=Object.entries(m).sort((a,b)=>b[1]-a[1]);
+  destroy('chObj');
+  charts.chObj=new Chart(document.getElementById('chObj'),{type:'bar',
+    data:{labels:e.map(x=>x[0].length>28?x[0].slice(0,26)+'…':x[0]),datasets:[{data:e.map(x=>x[1]),backgroundColor:'#2BE86B',borderColor:'#000',borderWidth:2.5,borderRadius:6}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false}},scales:{x:{grid:{color:'#2A2A2F'},ticks:{precision:0}},y:{grid:{display:false},ticks:{font:{size:10}}}}}});
+}
+function drawAvanceChart(d){
+  const g=groupBy(d,'objetivo'); const ks=Object.keys(g).sort((a,b)=>avgPct(g[b])-avgPct(g[a]));
+  destroy('chAvance');
+  charts.chAvance=new Chart(document.getElementById('chAvance'),{type:'bar',
+    data:{labels:ks.map(k=>k.length>24?k.slice(0,22)+'…':k),datasets:[{label:'% avance',data:ks.map(k=>avgPct(g[k])),
+      backgroundColor:ks.map(k=>{const p=avgPct(g[k]);return p>=66?'#2BE86B':p>=35?'#F4E500':'#FF4D5E';}),borderColor:'#000',borderWidth:2.5,borderRadius:6}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+      scales:{y:{beginAtZero:true,max:100,grid:{color:'#2A2A2F'},ticks:{callback:v=>v+'%'}},x:{grid:{display:false},ticks:{font:{size:9.5}}}}}});
+}
+function drawRankChart(map,keys){
+  const e=keys.slice(0,10);
+  destroy('chRank');
+  charts.chRank=new Chart(document.getElementById('chRank'),{type:'bar',
+    data:{labels:e.map(k=>k.length>30?k.slice(0,28)+'…':k),datasets:[{data:e.map(k=>map[k].length),backgroundColor:'#F4E500',borderColor:'#000',borderWidth:2.5,borderRadius:6}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+      scales:{x:{grid:{color:'#2A2A2F'},ticks:{precision:0}},y:{grid:{display:false},ticks:{font:{size:10}}}}}});
+}
+
+/* ============================================================
+   UTILS
+   ============================================================ */
+function groupBy(arr,k){ const o={}; arr.forEach(r=>{const key=r[k]||'(sin asignar)';(o[key]=o[key]||[]).push(r);}); return o; }
+function avgPct(arr){ if(!arr.length) return 0; return Math.round(arr.reduce((s,r)=>s+r._a.pct,0)/arr.length); }
+function emptyState(t){ return `<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4-4"/></svg><div style="font-weight:700;font-size:15px">${t}</div></div>`; }
+
+function countUp(){
+  document.querySelectorAll('[data-count]').forEach(el=>{
+    const t=+el.dataset.count; let s=0; const step=Math.max(1,Math.ceil(t/28));
+    const iv=setInterval(()=>{ s+=step; if(s>=t){s=t;clearInterval(iv);} el.textContent=s; },24);
+  });
+}
+const _origRender=render;
+render=function(){ _origRender(); countUp(); };
+
+function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2600); }
+
+function bindTooltips(){
+  const tt=document.getElementById('tt');
+  document.querySelectorAll('[data-tt]').forEach(el=>{
+    el.onmousemove=e=>{ tt.innerHTML=el.dataset.tt; tt.style.display='block';
+      let x=e.clientX+14,y=e.clientY+14; if(x+300>innerWidth)x=e.clientX-310; tt.style.left=x+'px'; tt.style.top=y+'px'; };
+    el.onmouseleave=()=>tt.style.display='none';
+  });
+}
+
+/* ============================================================
+   ADMIN / UPLOAD (oculto)
+   ============================================================ */
+function openAdmin(){ document.getElementById('modalBg').classList.add('show'); }
+function closeAdmin(){ document.getElementById('modalBg').classList.remove('show'); }
+function bindAdmin(){
+  document.getElementById('adminDot').onclick=openAdmin;
+  document.getElementById('maClose').onclick=closeAdmin;
+  document.getElementById('modalBg').onclick=e=>{ if(e.target.id==='modalBg') closeAdmin(); };
+  // keyboard shortcut Ctrl+Shift+U
+  document.addEventListener('keydown',e=>{ if(e.ctrlKey&&e.shiftKey&&e.key.toLowerCase()==='u'){e.preventDefault();openAdmin();} });
+  const drop=document.getElementById('drop'), input=document.getElementById('fileInput');
+  drop.onclick=()=>input.click();
+  input.onchange=e=>{ if(e.target.files[0]) handleFile(e.target.files[0]); };
+  drop.ondragover=e=>{e.preventDefault();drop.style.background='rgba(43,232,107,.14)';};
+  drop.ondragleave=()=>drop.style.background='';
+  drop.ondrop=e=>{e.preventDefault();drop.style.background='';if(e.dataTransfer.files[0])handleFile(e.dataTransfer.files[0]);};
+  document.getElementById('btnRestore').onclick=()=>{
+    localStorage.removeItem('parche_data'); DATA=JSON.parse(JSON.stringify(ORIGINAL_DATA));
+    prep(); buildFilters(); Object.keys(aiCache).forEach(k=>delete aiCache[k]); render();
+    status('ok','Datos originales restaurados ✓'); toast('Datos restaurados'); setTimeout(closeAdmin,900);
+  };
+}
+function status(c,m){ const s=document.getElementById('upStatus'); s.className='upload-status '+c; s.textContent=m; }
+function handleFile(file){
+  status('ok','Procesando '+file.name+'…');
+  const fr=new FileReader();
+  fr.onload=ev=>{
+    try{
+      const wb=XLSX.read(new Uint8Array(ev.target.result),{type:'array'});
+      const ws=wb.Sheets[wb.SheetNames.find(n=>/plan/i.test(n))||wb.SheetNames[0]];
+      const rows=XLSX.utils.sheet_to_json(ws,{header:1,raw:false,defval:null});
+      // find header row containing "Objetivo"
+      let hi=rows.findIndex(r=>r&&r.some(c=>String(c||'').trim().toLowerCase()==='objetivo'));
+      if(hi<0) hi=2;
+      const keys=['objetivo','meta','accion','fechaInicio','fechaFin','indicador','periodicidad','responsable','fuente','metaIndicador','ejecucion','descripcion','entregable','observaciones','periodoReporte'];
+      const out=[];
+      for(let i=hi+1;i<rows.length;i++){
+        const r=rows[i]; if(!r||r.every(c=>c==null||c==='')) continue;
+        const rec={id:out.length+1};
+        keys.forEach((k,j)=>{ let v=r[j]; if(v!=null&&typeof v!=='number')v=String(v).trim(); rec[k]=(v===''?null:v); });
+        // coerce numeric meta/ejec
+        rec.metaIndicador=rec.metaIndicador!=null&&!isNaN(+rec.metaIndicador)?+rec.metaIndicador:rec.metaIndicador;
+        rec.ejecucion=rec.ejecucion!=null&&!isNaN(+rec.ejecucion)?+rec.ejecucion:rec.ejecucion;
+        out.push(rec);
+      }
+      if(!out.length) throw new Error('No se encontraron filas de datos');
+      DATA=out; localStorage.setItem('parche_data',JSON.stringify(out));
+      prep(); buildFilters(); filters.obj=filters.dep=filters.ind='';
+      ['fObj','fDep','fInd'].forEach(id=>document.getElementById(id).value='');
+      Object.keys(aiCache).forEach(k=>delete aiCache[k]); render();
+      status('ok',`✓ ${out.length} acciones cargadas correctamente`); toast('Datos actualizados ✓');
+      setTimeout(closeAdmin,1100);
+    }catch(err){ status('err','✕ Error: '+err.message+'. Verifica el formato del Excel.'); }
+  };
+  fr.onerror=()=>status('err','✕ No se pudo leer el archivo');
+  fr.readAsArrayBuffer(file);
+}
+
+/* ============================================================
+   INIT
+   ============================================================ */
+function init(){
+  const saved=localStorage.getItem('parche_data');
+  DATA = saved?JSON.parse(saved):JSON.parse(JSON.stringify(ORIGINAL_DATA));
+  prep(); buildNav(); buildFilters(); bindFilters(); bindAdmin();
+  document.getElementById('burger').onclick=()=>document.getElementById('sidebar').classList.toggle('collapsed');
+  render();
+}
+document.addEventListener('DOMContentLoaded',init);
+})();
+
+</script>
+</body>
+</html>
